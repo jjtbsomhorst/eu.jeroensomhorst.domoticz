@@ -9,12 +9,6 @@ class DomoticzPowerDevice extends Homey.Device{
         this._intervalId = setInterval(()=>{
             this.doPoll();
         },10000);
-        //  
-        // start cron job
-        //  in cron Get driver
-        //  get data from driver
-        //  fill capability values
-        //  done
     }
     updateState(result){
         

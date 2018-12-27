@@ -180,6 +180,8 @@ class DomoticzDriver extends Homey.Driver{
             default:
                 return 'sensor';
         }
+
+
     }
 
     getDeviceCapabilities(deviceEntry){
@@ -194,9 +196,10 @@ class DomoticzDriver extends Homey.Driver{
                 if(deviceEntry.hasOwnProperty('HaveDimmer') && deviceEntry.HaveDimmer === true && deviceEntry.DimmerType !== "none"){
                     capabilities.push('dim');
                 }
-
                 break;
-
+            default:
+                capabilities.push('onoff');
+            break;
         }
 
         switch(deviceEntry.SubType){
