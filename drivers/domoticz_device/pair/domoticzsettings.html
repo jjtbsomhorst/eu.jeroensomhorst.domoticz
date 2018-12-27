@@ -1,0 +1,58 @@
+<script type="text/javascript">
+    Homey.setTitle("Specificy Domotics settings");
+
+    Homey.emit('start',{},(err,result)=>{
+        if(err){
+            Homey.alert(err);
+        }else{
+            console.log('Retrieved settings from backend');
+            console.log(result);
+            if(result) {
+                document.getElementById("hostname").value = result.host;
+                document.getElementById("port").value = result.port;
+                document.getElementById("username").value = result.username;
+                document.getElementById("password").value = result.password;
+            }
+        }
+    });
+
+
+    function doSubmit(){
+        let username = document.getElementById('username').value;
+        let password = document.getElementById('password').value;
+        let hostname = document.getElementById('hostname').value;
+        let port = document.getElementById('port').value;
+        if(!username || !password || !hostname || !port){
+            Homey.alert('Please fill in all fields');
+        }else {
+
+            Homey.emit('validate', {
+                "host": hostname,
+                "port": port,
+                "username": username,
+                "password": password
+            }, (err, result) => {
+                debugger;
+                console.log("No error returned from backend");
+                if (!err) {
+                    Homey.nextView();
+                } else {
+                    Homey.alert(err);
+                }
+            });
+        }
+    }
+
+</script>
+
+<form>
+    <label for="hostname">Hostname/IP adres</label>
+    <input type="text" id="hostname" name="hostname" placeholder="hostname"/><br/>
+    <label for="port">Port</label>
+    <input type="text" id="port" name="port" placeholder="port"/><br/>
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username" placeholder="username"/><br/>
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" placeholder="password"/><br/>
+    <button type="button" onclick="doSubmit()">Save</button>
+</form>

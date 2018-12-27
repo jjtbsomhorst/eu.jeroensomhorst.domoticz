@@ -10,7 +10,7 @@
     "en": "Add support for Domoticz devices"
   },
   "category": [
-    "energy"
+    "energy","tools"
   ],
   "permissions": [],
   "images": {
@@ -22,75 +22,31 @@
     "email": "j.somhorst@gmail.com"
   },
   "capabilities":{
-    "meter_offPeak":{
-      "type":"boolean",
-      "title": {
-          "en": "Off-peak",
-          "nl": "Laag tarief"
-      },
-      "desc":{
-        "en": "Is off-peak tarriff active?",
-        "nl": "Is laag tarief actief?"
-      },
-      "getable": true,
-      "setable":false
-    },
-    "measure_gas": {
-      "type": "number",
-      "title":{
-        "en": "Gas",
-        "nl": "Gas"
-      },
-      "desc":{
-        "en": "Gas usage",
-        "nl": "Gasverbruik"
-      },
-      "getable": true,
-      "setable": false
-    }
+
   },
   "drivers": [
     {
-        "id": "domoticz_gas",
-        "name": "Domoticz Gas meter",
-        "pair": [
-          {
-              "id": "list_devices",
-              "template": "list_devices",
-              "navigation": {
-                  "next": "add_my_devices"
-                }
-          },
-          {
-              "id": "add_my_devices",
-              "template": "add_devices" 
+      "id": "domoticz_device",
+      "name": "Domotic Device",
+      "class": "other",
+      "capabilities": [],
+      "pair": [{
+          "id": "domoticzsettings",
+          "navigation": {
+            "next": "list_devices"
           }
-      ] ,
-        "class": "sensor",
-        "capabilities": [
-          "meter_gas"
-        ]
-    },
-    {
-      "id": "domoticz_power",
-      "name": "Domoticz Power meter",
-      "pair": [
-        {
-            "id": "list_devices",
-            "template": "list_devices",
-            "navigation": {
-                "next": "add_my_devices"
-              }
-        },
-        {
-            "id": "add_my_devices",
-            "template": "add_devices" 
+        },{
+        "id": "list_devices",
+        "template": "list_devices",
+        "navigation": {
+          "next": "add_my_devices"
         }
-      ],
-      "class": "sensor",
-      "capabilities": [
-        "measure_power",
-        "meter_power"
+      },
+        {
+          "id": "add_my_devices",
+          "template": "add_devices"
+        }
+
       ]
     }
 ]
