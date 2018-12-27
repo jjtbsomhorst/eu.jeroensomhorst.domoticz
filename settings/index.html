@@ -1,0 +1,63 @@
+<html>
+    <head>
+        <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+    </head>
+    <body>
+        <h1>Domoticz server settings</h1>
+        
+        <form>
+            <label for="host">Hostname/IP adres</label>
+            <input type="text" name="hostname" placeholder="hostname"/><br/>
+            <label for="port">Port</label>
+            <input type="text" name="port" placeholder="port"/><br/>
+            <label for="username">Username</label>
+            <input type="text" name="username" placeholder="username"/><br/>
+            <label for="password">Password</label>
+            <input type="password" name="password" placeholder="password"/><br/>
+            <button type="button" onclick="doSubmit()">Save</button>
+        </form>
+
+        <script type="text/javascript">
+            function onHomeyReady(Homey){
+                window.HomeyAPI = Homey;
+                Homey.ready();
+
+                HomeyAPI.get('domotics_config',(error,data)=>{
+                    if(data != null){
+                        document.getElementsByName('hostname')[0].value = data.host;
+                        document.getElementsByName('port')[0].value = data.port;
+                        document.getElementsByName('username')[0].value = data.username;
+                        document.getElementsByName('password')[0].value = data.password;
+                    }
+                });
+            }
+
+            function getSettingsObject(){
+                let hostname = document.getElementsByName('hostname')[0].value;
+                let port = document.getElementsByName('port')[0].value;
+                let username = document.getElementsByName('username')[0].value;
+                let password = document.getElementsByName('password')[0].value;
+
+                return settings = {
+                    'username':username,
+                    'host': hostname,
+                    'port': port,
+                    'password': password
+                };
+            }
+
+            function doSubmit(){
+                let s = getSettingsObject();
+                HomeyAPI.api('POST','/validate',s,function(err,result){
+                    if(err){
+                        return false;
+                    }else{
+                        HomeyAPI.set('domotics_config',s);
+                    }
+                });
+                
+            }
+
+        </script>   
+    </body>
+</html>
