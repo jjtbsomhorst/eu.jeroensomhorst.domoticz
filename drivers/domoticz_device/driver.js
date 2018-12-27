@@ -14,7 +14,7 @@ class DomoticzDriver extends Homey.Driver{
         if(d) {
             this._intervalId = setInterval(() => {
                 this.onCronRun();
-            }, 500);
+            }, 1000);
         }
 
     }
@@ -40,7 +40,7 @@ class DomoticzDriver extends Homey.Driver{
             deviceMap.set(d.getData().idx,d);
         });
 
-        this.domoticz.findDevice(null, null, null).then((result) => {
+        this.getDomoticz().findDevice(null, null, null).then((result) => {
             // for each device update state;
                 result.forEach((element) => {
                     if(deviceMap.has(element.idx)){ // found the device
@@ -117,14 +117,17 @@ class DomoticzDriver extends Homey.Driver{
 
     onPair(socket){
         socket.on('start',(data,callback)=>{
+            console.log("retrieve settings");
             this.retrieveSettings(data,callback);
         });
 
         socket.on('validate',(data,callback)=>{
+           console.log("validate settings");
            this.validateSettings(data,callback);
         });
 
         socket.on('list_devices',(data,callback)=>{
+            console.log("List devices");
             this.onPairListDevices(data,callback);
         })
 
@@ -219,13 +222,21 @@ class DomoticzDriver extends Homey.Driver{
     onPairListDevices( data, callback ) {
         console.log("On pair list devices");
         let currentDevices = this.getDevices();
+        let domoticz = this.getDomoticz();
+        if(!domoticz){
+            callback(false,"kapot");
+            return;
+        }
+
         let keys = [];
         currentDevices.forEach((d)=>{
             keys.push(d.getData().idx);
         });
 
         let devices = [];
-        this.domoticz.findDevice(null,null,null).then((result)=>{
+
+
+        domoticz.findDevice(null,null,null).then((result)=>{
             let devices = [];
 
             result.forEach((element)=>{
