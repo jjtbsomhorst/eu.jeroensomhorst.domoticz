@@ -1,7 +1,7 @@
 'use strict';
 
 const Homey = require('homey');
-const Domoticz = require('domoticz');
+
 class DomoticzApp extends Homey.App {
 	
 	onInit() {
@@ -47,11 +47,16 @@ class DomoticzApp extends Homey.App {
 	}
 
 	doLog(msg){
-		this.log(msg);
-		this.logArray.push(msg);
-		let remainder = this.logArray.length % 200;
-		if(remainder == 0){ // save every 200 lines
-			this.saveLog();
+		let date = new Date();
+		let line = date.toLocaleString()+": "+msg;
+		if(msg instanceof Object){
+			line = date.toLocaleString()+": "+JSON.stringify(msg);
+		}
+
+		this.log(line);
+		this.logArray.push(line);
+		if(this.logArray.length > 500){ // only persist 500 lines
+			this.logArray.shift();
 		}
 	}
 
