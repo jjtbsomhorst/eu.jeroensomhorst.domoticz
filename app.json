@@ -1,6 +1,6 @@
 {
   "id": "eu.jeroensomhorst.domoticz",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "compatibility": ">=1.5.0",
   "sdk": 2,
   "name": {
@@ -14,8 +14,9 @@
   ],
   "permissions": [],
   "images": {
-    "large": "/assets/images/large.png",
-    "small": "/assets/images/small.png"
+    "large": "assets/domoticz_large.jpg",
+
+    "small": "assets/domoticz_small.jpg"
   },
   "author": {
     "name": "Jeroen Somhorst",
@@ -30,6 +31,10 @@
       "name": "Domotic Device",
       "class": "other",
       "capabilities": [],
+      "images": {
+        "large": "assets/driver/domoticz_large.jpg",
+        "small": "assets/driver/domoticz_small.jpg"
+      },
       "pair": [{
           "id": "domoticzsettings",
           "navigation": {

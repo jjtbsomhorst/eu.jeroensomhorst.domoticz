@@ -4,7 +4,9 @@ const Homey = require('homey');
 
 class DomoticzDevice extends Homey.Device{
     onInit(){
-        console.log("DomoticzDevice initialized");
+        Homey.app.doLog("DomoticzDriver initialized");
+        Homey.app.doLog("Data: ");
+        Homey.app.doLog(this.getData());
         this.registerMultipleCapabilityListener(this.getCapabilities(),(values,opts)=>{
             this.onCapabilityChange(values,opts);
         },500); // every half second
@@ -19,14 +21,13 @@ class DomoticzDevice extends Homey.Device{
     }
 
     onCapabilityChange(values,opts){
-        console.log("Capabilities have changed");
-        console.log("-----");
-        console.log(values);
-        console.log("-----");
-        console.log(opts);
-        console.log("-----");
+        Homey.app.doLog("Capabilities have changed");
+        Homey.app.doLog("-----");
+        Homey.app.doLog(values);
+        Homey.app.doLog("-----");
+        Homey.app.doLog(opts);
+        Homey.app.doLog("-----");
         this.getDriver().updateExternalState(values,this);
-        //this.driver.updateState(values,this.getData().idx); // update the state on domoticz side.
     }
 
 }

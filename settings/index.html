@@ -3,22 +3,30 @@
         <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
     </head>
     <body>
-        <h1>Domoticz server settings</h1>
-        
-        <form>
-            <label for="host">Hostname/IP adres</label>
-            <input type="text" name="hostname" placeholder="hostname"/><br/>
-            <label for="port">Port</label>
-            <input type="text" name="port" placeholder="port"/><br/>
-            <label for="username">Username</label>
-            <input type="text" name="username" placeholder="username"/><br/>
-            <label for="password">Password</label>
-            <input type="password" name="password" placeholder="password"/><br/>
-            <button type="button" onclick="doSubmit()">Save</button>
-        </form>
+        <div id="Settings">
+            <h1>Domoticz server settings</h1>
+
+            <form>
+                <label for="host">Hostname/IP adres</label>
+                <input type="text" name="hostname" placeholder="hostname"/><br/>
+                <label for="port">Port</label>
+                <input type="text" name="port" placeholder="port"/><br/>
+                <label for="username">Username</label>
+                <input type="text" name="username" placeholder="username"/><br/>
+                <label for="password">Password</label>
+                <input type="password" name="password" placeholder="password"/><br/>
+                <button type="button" onclick="doSubmit()">Save</button>
+            </form>
+        </div>
+        <div id="logging">
+            <button class="right" id="refreshLog" onclick="refreshLog()">Refresh</button>
+            <button class="right" id="deleteLog" onclick="deleteLog()">Delete</button>
+            <textarea id="log" style="width: 98%; height: 100%;" rows="50"></textarea>
+        </div>
+
 
         <script type="text/javascript">
-            function onHomeyReady(Homey){
+             function onHomeyReady(Homey){
                 window.HomeyAPI = Homey;
                 Homey.ready();
 
@@ -29,6 +37,29 @@
                         document.getElementsByName('username')[0].value = data.username;
                         document.getElementsByName('password')[0].value = data.password;
                     }
+                });
+            }
+
+            function refreshLog(){
+                HomeyAPI.api('GET', 'logs/', function(err, result) {
+                    if(!err) {
+                        document.getElementById('log').innerHTML = "";
+                        for (var i = (result.length - 1); i >= 0; i--) {
+                            document.getElementById('log').innerHTML += JSON.stringify(result[i]).replace(/\"/g, "").replace(/\\n/g, "");
+                            document.getElementById('log').innerHTML += "\n"; // "<br />";
+                        }
+                    }
+                });
+            }
+
+            function deleteLog(){
+                HomeyAPI.api('DELETE', 'logs/', function(err, result) {
+                    if (!err) {
+                        document.getElementById('log').innerHTML = "";
+                    }else{
+                        alert(err);
+                    }
+                    refreshLog();
                 });
             }
 

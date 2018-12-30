@@ -17,5 +17,20 @@ module.exports = [
                 callback(null,false);
             });
         }
+    },
+    {
+        method: 'DELETE',
+        path: 'logs',
+        fn: function (req, callback) {
+            const result = Homey.app.deleteLogs();
+            callback(null, result);
+        }
+    },
+    {
+        method: 'GET',
+        path: 'logs',
+        fn: function(req,callback){
+            callback(null, Homey.app.getLogs());
+        }
     }
 ];
