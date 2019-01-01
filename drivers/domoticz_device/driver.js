@@ -72,6 +72,7 @@ class DomoticzDriver extends Homey.Driver{
 
     updateExternalState(values,device){
         Homey.app.doLog('Update external state of the device');
+        Homey.app.doLog(values);
         let domoticz = this.getDomoticz();
         let idx = device.getData().idx;
 
@@ -90,6 +91,15 @@ class DomoticzDriver extends Homey.Driver{
                        return false;
                    });
                break;
+               case CAPABILITY_TARGET_TEMPERATURE:
+                   this.domoticz.updateDevice('setsetpoint',idx,values[key],null).then((data)=>{
+                        Homey.app.doLog('Succesfully updated state external');
+                        Homey.app.doLog(data);
+                   }).catch((error)=>{
+                       Homey.app.doError('Error while updating setpoint in domoticz');
+                       Homey.app.doError(error);
+                    });
+                    break;
                default:
                    return true;
            }
@@ -99,7 +109,7 @@ class DomoticzDriver extends Homey.Driver{
 
     _updateInternalState(device,data){
         Homey.app.doLog("Update internal state of device");
-        Homey.app.doLog("Update capabilities");
+        Homey.app.doLog("Update capability values");
 
 
         if(this.lastUpdates.has(data.idx)){
@@ -113,35 +123,59 @@ class DomoticzDriver extends Homey.Driver{
 
         Homey.app.doLog("Device data: ");
         Homey.app.doLog(data);
+
         device.getCapabilities().forEach((element)=>{
+
+            let value = null;
+
             switch(element){
                 case CAPABILITY_ONOFF:
-                    Homey.app.doLog("OnOff capabilitie");
                     switch(data.Status){
                         case 'Off':
-                            device.setCapabilityValue(element,false);
+                            value = false;
                             break;
                         default:
-                            device.setCapabilityValue(element,true);
+                            value = true;
+
                             break;
                     }
                     break;
                 case CAPABILITY_METER_GAS:
                     Homey.app.doLog("meter_gas capabilitie");
-                    device.setCapabilityValue(element,parseFloat(data.CounterToday.split(" ")[0]));
+                    value = parseFloat(data.CounterToday.split(" ")[0]);
+
                     break;
                 case CAPABILITY_MEASURE_POWER:
                     Homey.app.doLog("measure power capabilitie");
-                    device.setCapabilityValue(element,parseFloat(data.Usage.split(" ")[0]));
+                    value = parseFloat(data.Usage.split(" ")[0]);
+
                     break;
                 case CAPABILITY_METER_POWER:
                     Homey.app.doLog("meter_power capabilitie");
-                    device.setCapabilityValue(element,parseFloat(data.CounterToday.split(" ")[0]));
+                    value = parseFloat(data.CounterToday.split(" ")[0]);
+
+                    break;
+                case CAPABILITY_TARGET_TEMPERATURE:
+                    value = parseFloat(data.SetPoint);
+                    break;
+                case CAPABILITY_MEASURE_TEMPERATURE:
+                    value = data.Temp;
                     break;
             }
+
+            if(value !== null){
+                device.setCapabilityValue(element,value,(err,result)=>{
+                   if(err){
+                       Homey.app.doError(' ----- Unsuccesfull updating capability ------');
+                       Homey.app.doError(element);
+                       Homey.app.doError(value);
+                   }
+                });
+            }
+
         });
 
-        
+
         this.lastUpdates.set(data.idx,data.LastUpdate);
     }
 
@@ -239,23 +273,22 @@ class DomoticzDriver extends Homey.Driver{
             case 'Humidity':
                 capabilities.push(CAPABILITY_MEASURE_HUMIDITY);
                 break;
+            case 'Temp':
+                capabilities.push(CAPABILITY_MEASURE_TEMPERATURE);
+                break;
             case 'Light/Switch':
                 capabilities.push(CAPABILITY_ONOFF);
                 if(deviceEntry.hasOwnProperty('HaveDimmer') && deviceEntry.HaveDimmer === true && deviceEntry.DimmerType !== "none"){
                     capabilities.push('dim');
-                }
-                break;
-            default:
+                };
+
                 capabilities.push(CAPABILITY_ONOFF);
-            break;
+                break;
         }
 
         switch(deviceEntry.SubType){
             case 'Gas':
                 capabilities.push(CAPABILITY_METER_GAS);
-                break;
-            case 'Temp':
-                capabilities.push(CAPABILITY_MEASURE_TEMPERATURE);
                 break;
             case 'Energy':
                 capabilities.push(CAPABILITY_MEASURE_POWER);
