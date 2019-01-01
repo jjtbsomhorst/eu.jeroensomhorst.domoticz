@@ -4,18 +4,28 @@ const Homey = require('homey');
 const Domoticz = require('domoticz');
 const DEVICE_DEFAULT_NAME = "Domoticz device";
 
+const CAPABILITY_TARGET_TEMPERATURE = 'target_temperature';
+const CAPABILITY_MEASURE_TEMPERATURE = 'measure_temperature';
+const CAPABILITY_MEASURE_POWER = 'measure_power';
+const CAPABILITY_METER_POWER = 'meter_power';
+const CAPABILITY_MEASURE_HUMIDITY = 'measure_humidity';
+const CAPABILITY_METER_GAS = 'meter_gas';
+const CAPABILITY_ONOFF = 'onoff';
+
+
 class DomoticzDriver extends Homey.Driver{
 
     onInit(){
         Homey.app.doLog("Initialize driver");
         let d = this.getDomoticz();
-
         if(d) {
             this._intervalId = setInterval(() => {
                 this.onCronRun();
             }, 1000);
 
         }
+
+        this.lastUpdates = new Map();
 
     }
 
@@ -61,23 +71,27 @@ class DomoticzDriver extends Homey.Driver{
     }
 
     updateExternalState(values,device){
+        Homey.app.doLog('Update external state of the device');
         let domoticz = this.getDomoticz();
         let idx = device.getData().idx;
 
         Object.keys(values).forEach((key)=>{
            switch(key){
-               case 'onoff':
+               case CAPABILITY_ONOFF:
                    var switchcommand = (values[key] === true ? 'On' : 'Off');
 
                    this.domoticz.updateDevice('switchlight',idx,switchcommand,null).then((data)=>{
-
+                        Homey.app.doLog('Succesfully updated state external');
+                        Homey.app.doLog(data);
+                        return true;
                    }).catch((error)=>{
                        Homey.app.doError('Error while updating device in domoticz');
                        Homey.app.doError(error);
+                       return false;
                    });
                break;
-
-
+               default:
+                   return true;
            }
         });
 
@@ -86,11 +100,22 @@ class DomoticzDriver extends Homey.Driver{
     _updateInternalState(device,data){
         Homey.app.doLog("Update internal state of device");
         Homey.app.doLog("Update capabilities");
+
+
+        if(this.lastUpdates.has(data.idx)){
+            let timeStamp = this.lastUpdates.get(data.idx);
+
+            if(timeStamp === data.LastUpdate){
+                Homey.app.doLog('Ignore device update for '+data.idx);
+                return true;
+            }
+        }
+
         Homey.app.doLog("Device data: ");
         Homey.app.doLog(data);
         device.getCapabilities().forEach((element)=>{
             switch(element){
-                case 'onoff':
+                case CAPABILITY_ONOFF:
                     Homey.app.doLog("OnOff capabilitie");
                     switch(data.Status){
                         case 'Off':
@@ -101,21 +126,23 @@ class DomoticzDriver extends Homey.Driver{
                             break;
                     }
                     break;
-                case 'meter_gas':
+                case CAPABILITY_METER_GAS:
                     Homey.app.doLog("meter_gas capabilitie");
                     device.setCapabilityValue(element,parseFloat(data.CounterToday.split(" ")[0]));
                     break;
-                case "measure_power":
-                    Homey.app.doLog("meter_gas capabilitie");
+                case CAPABILITY_MEASURE_POWER:
+                    Homey.app.doLog("measure power capabilitie");
                     device.setCapabilityValue(element,parseFloat(data.Usage.split(" ")[0]));
                     break;
-                case "meter_power":
+                case CAPABILITY_METER_POWER:
                     Homey.app.doLog("meter_power capabilitie");
                     device.setCapabilityValue(element,parseFloat(data.CounterToday.split(" ")[0]));
                     break;
             }
-        })
+        });
 
+        
+        this.lastUpdates.set(data.idx,data.LastUpdate);
     }
 
     getDomoticz(){
@@ -195,6 +222,8 @@ class DomoticzDriver extends Homey.Driver{
                 return 'sensor';
             case 'Light/Switch':
                 return 'light';
+            case 'Thermostat':
+                return 'thermostat';
             default:
                 return 'sensor';
         }
@@ -208,28 +237,33 @@ class DomoticzDriver extends Homey.Driver{
         Homey.app.doLog(deviceEntry);
         switch(deviceEntry.Type){
             case 'Humidity':
-                capabilities.push('measure_humidity');
+                capabilities.push(CAPABILITY_MEASURE_HUMIDITY);
                 break;
             case 'Light/Switch':
-                capabilities.push('onoff');
+                capabilities.push(CAPABILITY_ONOFF);
                 if(deviceEntry.hasOwnProperty('HaveDimmer') && deviceEntry.HaveDimmer === true && deviceEntry.DimmerType !== "none"){
                     capabilities.push('dim');
                 }
                 break;
             default:
-                capabilities.push('onoff');
+                capabilities.push(CAPABILITY_ONOFF);
             break;
         }
 
         switch(deviceEntry.SubType){
             case 'Gas':
-                capabilities.push('meter_gas');
+                capabilities.push(CAPABILITY_METER_GAS);
+                break;
+            case 'Temp':
+                capabilities.push(CAPABILITY_MEASURE_TEMPERATURE);
                 break;
             case 'Energy':
-                capabilities.push('measure_power');
-                capabilities.push('meter_power');
+                capabilities.push(CAPABILITY_MEASURE_POWER);
+                capabilities.push(CAPABILITY_METER_POWER);
                 break;
-
+            case 'SetPoint':
+                capabilities.push(CAPABILITY_TARGET_TEMPERATURE);
+                break;
         }
         Homey.app.doLog("Capabilities found: ");
         Homey.app.doLog(capabilities);

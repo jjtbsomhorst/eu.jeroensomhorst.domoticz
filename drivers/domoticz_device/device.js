@@ -27,7 +27,12 @@ class DomoticzDevice extends Homey.Device{
         Homey.app.doLog("-----");
         Homey.app.doLog(opts);
         Homey.app.doLog("-----");
-        this.getDriver().updateExternalState(values,this);
+        if(this.getDriver().updateExternalState(values,this)){
+            return Promise.resolve(true);
+        }else{
+            return Promise.resolve(false);
+        }
+
     }
 
 }
