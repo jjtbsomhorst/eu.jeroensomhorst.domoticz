@@ -11,7 +11,9 @@ const CAPABILITY_METER_POWER = 'meter_power';
 const CAPABILITY_MEASURE_HUMIDITY = 'measure_humidity';
 const CAPABILITY_METER_GAS = 'meter_gas';
 const CAPABILITY_ONOFF = 'onoff';
-
+const CAPABILITY_FANSPEED = 'fan_speed';
+const CAPABILITY_WIND_ANGLE = 'measure_wind_angle';
+const CAPABILITY_WIND_STRENGTH = 'measure_wind_strength';
 
 class DomoticzDriver extends Homey.Driver{
 
@@ -161,6 +163,21 @@ class DomoticzDriver extends Homey.Driver{
                 case CAPABILITY_MEASURE_TEMPERATURE:
                     value = data.Temp;
                     break;
+                case CAPABILITY_FANSPEED:
+                    let rpm = data.Data.toLowerCase();
+                    rpm = rpm.replace('RPM','');
+                    rpm = rpm.trim();
+                    value = parseFloat(rpm);
+                    break;
+                case CAPABILITY_WIND_ANGLE:
+                    var speeds = data.Data.split(";");
+                    value = parseFloat(speeds[0]);
+                    break;
+                case CAPABILITY_WIND_STRENGTH:
+                    var speeds = data.Data.split(";");
+                    value = parseFloat(speeds[3])/10;
+                    value = value * 3.6;
+                    break;
             }
 
             if(value !== null){
@@ -284,6 +301,15 @@ class DomoticzDriver extends Homey.Driver{
 
                 capabilities.push(CAPABILITY_ONOFF);
                 break;
+            case 'Color Switch':
+                // TODO need to find a way to dimm the lights.
+                capabilities.push(CAPABILITY_ONOFF);
+                break;
+            case 'Wind':
+                capabilities.push(CAPABILITY_WIND_ANGLE);
+                capabilities.push(CAPABILITY_WIND_STRENGTH);
+                break;
+
         }
 
         switch(deviceEntry.SubType){
@@ -293,6 +319,9 @@ class DomoticzDriver extends Homey.Driver{
             case 'Energy':
                 capabilities.push(CAPABILITY_MEASURE_POWER);
                 capabilities.push(CAPABILITY_METER_POWER);
+                break;
+            case 'Fan':
+                capabilities.push(CAPABILITY_FANSPEED);
                 break;
             case 'SetPoint':
                 capabilities.push(CAPABILITY_TARGET_TEMPERATURE);
