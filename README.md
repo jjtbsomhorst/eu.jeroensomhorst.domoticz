@@ -1,3 +1,3 @@
 # Domoticz app 
 
-Add support for Domoticz devices
+Homey app that adds support for domoticz devices.
