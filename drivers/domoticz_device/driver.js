@@ -270,8 +270,6 @@ class DomoticzDriver extends Homey.Driver{
             default:
                 return 'sensor';
         }
-
-
     }
 
     getDeviceCapabilities(deviceEntry){
@@ -322,7 +320,7 @@ class DomoticzDriver extends Homey.Driver{
         Homey.app.doLog("Capabilities found: ");
         Homey.app.doLog(capabilities);
 
-        return [];
+        return capabilities;
     }
 
     onPairListDevices( data, callback ) {
@@ -348,13 +346,15 @@ class DomoticzDriver extends Homey.Driver{
             result.forEach((element)=>{
                 if(keys.indexOf(element.idx) < 0 ) {
                     let capabilities = this.getDeviceCapabilities(element);
-                    let deviceClass = this.getDeviceCapabilities(element);
+                    let deviceClass = this.getDeviceClass(element);
+                    Homey.app.doLog(capabilities);
+                    Homey.app.doLog(deviceClass);
 
                     if(capabilities.length > 0 && deviceClass != null){
                         devices.push({
                             "name": element.Name || DEVICE_DEFAULT_NAME,
-                            "class": this.getDeviceClass(element),
-                            "capabilities": this.getDeviceCapabilities(element),
+                            "class": deviceClass,
+                            "capabilities": capabilities,
                             "data": {
                                 id: this.guid(),
                                 idx: element.idx,
