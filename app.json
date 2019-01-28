@@ -1,6 +1,6 @@
 {
   "id": "eu.jeroensomhorst.domoticz",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "compatibility": ">=1.5.0",
   "sdk": 2,
   "name": {
