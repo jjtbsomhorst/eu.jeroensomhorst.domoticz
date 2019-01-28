@@ -121,11 +121,10 @@ class DomoticzDriver extends Homey.Driver{
                 return true;
             }
         }
+        Homey.app.doLog("Update internal state of device");
+        Homey.app.doLog("Device: ");
+        Homey.app.doLog(device);
 
-  //    Homey.app.doLog("Device data: ");
-//      Homey.app.doLog(data);
-        //Homey.app.doLog("Update internal state of device");
-        //Homey.app.doLog("Update capability values");
         device.getCapabilities().forEach((element)=>{
 
             let value = null;
@@ -143,17 +142,14 @@ class DomoticzDriver extends Homey.Driver{
                     }
                     break;
                 case CAPABILITY_METER_GAS:
-                    //Homey.app.doLog("meter_gas capabilitie");
                     value = parseFloat(data.CounterToday.split(" ")[0]);
 
                     break;
                 case CAPABILITY_MEASURE_POWER:
-                    //Homey.app.doLog("measure power capabilitie");
                     value = parseFloat(data.Usage.split(" ")[0]);
 
                     break;
                 case CAPABILITY_METER_POWER:
-                    //Homey.app.doLog("meter_power capabilitie");
                     value = parseFloat(data.CounterToday.split(" ")[0]);
 
                     break;
@@ -170,22 +166,23 @@ class DomoticzDriver extends Homey.Driver{
                     value = parseFloat(rpm);
                     break;
                 case CAPABILITY_WIND_ANGLE:
-                    var speeds = data.Data.split(";");
-                    value = parseFloat(speeds[0]);
+                    let windAngle = data.Data.split(";");
+                    value = parseFloat(windAngle[0]);
                     break;
                 case CAPABILITY_WIND_STRENGTH:
-                    var speeds = data.Data.split(";");
-                    value = parseFloat(speeds[3])/10;
+                    let windStrength = data.Data.split(";");
+                    value = parseFloat(windStrength[3])/10;
                     value = value * 3.6;
                     break;
             }
 
             if(value !== null){
-                device.setCapabilityValue(element,value,(err,result)=>{
+                device.setCapabilityValue(element,value,(err)=>{
                    if(err){
                        Homey.app.doError(' ----- Unsuccesfull updating capability ------');
                        Homey.app.doError(element);
                        Homey.app.doError(value);
+                       Homey.app.doError(err);
                    }
                 });
             }
@@ -223,7 +220,7 @@ class DomoticzDriver extends Homey.Driver{
     }
 
     validateSettings(data,callback){
-        Homey.app.doLog("Lets validate credentials");
+        Homey.app.doLog("Validating credentials");
         Homey.app.doLog(data);
         let settings = data;
         let d = new Domoticz(data.username,data.password,data.host,data.port);
@@ -237,13 +234,12 @@ class DomoticzDriver extends Homey.Driver{
             this.saveSettings(data);
             callback(null,'OK');
         }).catch((error)=>{
-            Homey.app.doLog("Credentials are not correct or domoticz is not reachable");
+            Homey.app.doLog("Credentials are not correct or domoticz is not reachable!");
             callback(error,null);
         });
     }
 
     saveSettings(data){
-        //Homey.app.doLog("Saving settings into Homey");
         Homey.ManagerSettings.set('domotics_config',data);
     }
 
@@ -281,7 +277,7 @@ class DomoticzDriver extends Homey.Driver{
     getDeviceCapabilities(deviceEntry){
         let capabilities = [];
         Homey.app.doLog("Get capabilities for device");
-        //Homey.app.doLog(deviceEntry);
+        Homey.app.doLog(deviceEntry.idx);
         switch(deviceEntry.Type){
             case 'Humidity':
                 capabilities.push(CAPABILITY_MEASURE_HUMIDITY);
@@ -325,7 +321,8 @@ class DomoticzDriver extends Homey.Driver{
         }
         Homey.app.doLog("Capabilities found: ");
         Homey.app.doLog(capabilities);
-        return capabilities;
+
+        return [];
     }
 
     onPairListDevices( data, callback ) {
@@ -350,20 +347,28 @@ class DomoticzDriver extends Homey.Driver{
 
             result.forEach((element)=>{
                 if(keys.indexOf(element.idx) < 0 ) {
+                    let capabilities = this.getDeviceCapabilities(element);
+                    let deviceClass = this.getDeviceCapabilities(element);
 
-                    devices.push({
-                        "name": element.Name || DEVICE_DEFAULT_NAME,
-                        "class": this.getDeviceClass(element),
-                        "capabilities": this.getDeviceCapabilities(element),
-                        "data": {
-                            id: this.guid(),
-                            idx: element.idx,
-                        }
-                    });
+                    if(capabilities.length > 0 && deviceClass != null){
+                        devices.push({
+                            "name": element.Name || DEVICE_DEFAULT_NAME,
+                            "class": this.getDeviceClass(element),
+                            "capabilities": this.getDeviceCapabilities(element),
+                            "data": {
+                                id: this.guid(),
+                                idx: element.idx,
+                            }
+                        });
+                    }else{
+                        Homey.app.doLog("Could not determine device class or capabilities for device");
+                        Homey.app.doLog(element);
+                    }
+
                 }
             });
             Homey.app.doLog("Devices found: ");
-            //Homey.app.doLog(devices);
+            Homey.app.doLog(devices.length);
             callback(null,devices);
         }).catch((error)=>{
             Homey.app.doLog("Error while retrieving devicelist");
