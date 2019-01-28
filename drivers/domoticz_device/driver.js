@@ -52,12 +52,12 @@ class DomoticzDriver extends Homey.Driver{
         devices.forEach((d)=>{
             deviceMap.set(d.getData().idx,d);
         });
-        Homey.app.doLog("Update internal state of devices");
+        //Homey.app.doLog("Update internal state of devices");
         this.getDomoticz().findDevice(null, null, null).then((result) => {
-                Homey.app.doLog("Device info retrieved");
-                Homey.app.doLog("------");
-                Homey.app.doLog(result);
-                Homey.app.doLog("------");
+                //Homey.app.doLog("Device info retrieved");
+                //Homey.app.doLog("------");
+                //Homey.app.doLog(result);
+                //Homey.app.doLog("------");
                 result.forEach((element) => {
                     if(deviceMap.has(element.idx)){ // found the device
 
@@ -110,22 +110,22 @@ class DomoticzDriver extends Homey.Driver{
     }
 
     _updateInternalState(device,data){
-        Homey.app.doLog("Update internal state of device");
-        Homey.app.doLog("Update capability values");
+
 
 
         if(this.lastUpdates.has(data.idx)){
             let timeStamp = this.lastUpdates.get(data.idx);
 
             if(timeStamp === data.LastUpdate){
-                Homey.app.doLog('Ignore device update for '+data.idx);
+                //Homey.app.doLog('Ignore device update for '+data.idx);
                 return true;
             }
         }
 
-        Homey.app.doLog("Device data: ");
-        Homey.app.doLog(data);
-
+  //    Homey.app.doLog("Device data: ");
+//      Homey.app.doLog(data);
+        //Homey.app.doLog("Update internal state of device");
+        //Homey.app.doLog("Update capability values");
         device.getCapabilities().forEach((element)=>{
 
             let value = null;
@@ -143,17 +143,17 @@ class DomoticzDriver extends Homey.Driver{
                     }
                     break;
                 case CAPABILITY_METER_GAS:
-                    Homey.app.doLog("meter_gas capabilitie");
+                    //Homey.app.doLog("meter_gas capabilitie");
                     value = parseFloat(data.CounterToday.split(" ")[0]);
 
                     break;
                 case CAPABILITY_MEASURE_POWER:
-                    Homey.app.doLog("measure power capabilitie");
+                    //Homey.app.doLog("measure power capabilitie");
                     value = parseFloat(data.Usage.split(" ")[0]);
 
                     break;
                 case CAPABILITY_METER_POWER:
-                    Homey.app.doLog("meter_power capabilitie");
+                    //Homey.app.doLog("meter_power capabilitie");
                     value = parseFloat(data.CounterToday.split(" ")[0]);
 
                     break;
@@ -219,11 +219,7 @@ class DomoticzDriver extends Homey.Driver{
         socket.on('list_devices',(data,callback)=>{
             Homey.app.doLog("List new devices");
             this.onPairListDevices(data,callback);
-        })
-
-
-
-
+        });
     }
 
     validateSettings(data,callback){
@@ -247,7 +243,7 @@ class DomoticzDriver extends Homey.Driver{
     }
 
     saveSettings(data){
-        Homey.app.doLog("Saving settings into Homey");
+        //Homey.app.doLog("Saving settings into Homey");
         Homey.ManagerSettings.set('domotics_config',data);
     }
 
@@ -285,7 +281,7 @@ class DomoticzDriver extends Homey.Driver{
     getDeviceCapabilities(deviceEntry){
         let capabilities = [];
         Homey.app.doLog("Get capabilities for device");
-        Homey.app.doLog(deviceEntry);
+        //Homey.app.doLog(deviceEntry);
         switch(deviceEntry.Type){
             case 'Humidity':
                 capabilities.push(CAPABILITY_MEASURE_HUMIDITY);
@@ -367,7 +363,7 @@ class DomoticzDriver extends Homey.Driver{
                 }
             });
             Homey.app.doLog("Devices found: ");
-            Homey.app.doLog(devices);
+            //Homey.app.doLog(devices);
             callback(null,devices);
         }).catch((error)=>{
             Homey.app.doLog("Error while retrieving devicelist");
