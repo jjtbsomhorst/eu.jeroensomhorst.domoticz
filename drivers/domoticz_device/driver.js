@@ -284,6 +284,7 @@ class DomoticzDriver extends Homey.Driver{
                 break;
             case 'Light/Switch':
             case 'Lighting2':
+            case 'Lighting 2':
                 capabilities.push(CAPABILITY_ONOFF);
                 if(deviceEntry.hasOwnProperty('HaveDimmer') && deviceEntry.HaveDimmer === true && deviceEntry.DimmerType !== "none"){
                     capabilities.push('dim');
