@@ -75,7 +75,7 @@ class DomoticzDriver extends Homey.Driver{
     updateExternalState(values,device){
         Homey.app.doLog('Update external state of the device');
         Homey.app.doLog(values);
-        let domoticz = this.getDomoticz();
+
         let idx = device.getData().idx;
 
         Object.keys(values).forEach((key)=>{
@@ -222,7 +222,6 @@ class DomoticzDriver extends Homey.Driver{
     validateSettings(data,callback){
         Homey.app.doLog("Validating credentials");
         Homey.app.doLog(data);
-        let settings = data;
         let d = new Domoticz(data.username,data.password,data.host,data.port);
         d.findDevice(null,null,null).then((result)=>{
             if(result != null){
@@ -284,10 +283,11 @@ class DomoticzDriver extends Homey.Driver{
                 capabilities.push(CAPABILITY_MEASURE_TEMPERATURE);
                 break;
             case 'Light/Switch':
+            case 'Lighting2':
                 capabilities.push(CAPABILITY_ONOFF);
                 if(deviceEntry.hasOwnProperty('HaveDimmer') && deviceEntry.HaveDimmer === true && deviceEntry.DimmerType !== "none"){
                     capabilities.push('dim');
-                };
+                }
 
                 capabilities.push(CAPABILITY_ONOFF);
                 break;
@@ -336,9 +336,6 @@ class DomoticzDriver extends Homey.Driver{
         currentDevices.forEach((d)=>{
             keys.push(d.getData().idx);
         });
-
-        let devices = [];
-
 
         domoticz.findDevice(null,null,null).then((result)=>{
             let devices = [];
