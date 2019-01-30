@@ -343,25 +343,31 @@ class DomoticzDriver extends Homey.Driver{
 
             result.forEach((element)=>{
                 if(keys.indexOf(element.idx) < 0 ) {
-                    let capabilities = this.getDeviceCapabilities(element);
-                    let deviceClass = this.getDeviceClass(element);
-                    Homey.app.doLog(capabilities);
-                    Homey.app.doLog(deviceClass);
+                    if(element.hasOwnProperty('Used') && element.Used === 1){
 
-                    if(capabilities.length > 0 && deviceClass != null){
-                        devices.push({
-                            "name": element.Name || DEVICE_DEFAULT_NAME,
-                            "class": deviceClass,
-                            "capabilities": capabilities,
-                            "data": {
-                                id: this.guid(),
-                                idx: element.idx,
-                            }
-                        });
-                    }else{
-                        Homey.app.doLog("Could not determine device class or capabilities for device");
-                        Homey.app.doLog(element);
+                        let capabilities = this.getDeviceCapabilities(element);
+                        let deviceClass = this.getDeviceClass(element);
+                        Homey.app.doLog(capabilities);
+                        Homey.app.doLog(deviceClass);
+
+                        if(capabilities.length > 0 && deviceClass != null){
+                            devices.push({
+                                "name": element.Name || DEVICE_DEFAULT_NAME,
+                                "class": deviceClass,
+                                "capabilities": capabilities,
+                                "data": {
+                                    id: this.guid(),
+                                    idx: element.idx,
+                                }
+                            });
+                        }else{
+                            Homey.app.doLog("Could not determine device class or capabilities for device");
+                            Homey.app.doLog(element);
+                        }
+
+
                     }
+
 
                 }
             });
