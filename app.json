@@ -40,7 +40,7 @@
   "drivers": [
     {
       "id": "domoticz_device",
-      "name": "Domotic Device",
+      "name": { "en":"Domoticz Device","nl": "Domoticz apparaat"},
       "class": "other",
       "capabilities": [],
       "images": {
