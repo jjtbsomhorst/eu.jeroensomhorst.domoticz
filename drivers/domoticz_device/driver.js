@@ -15,6 +15,10 @@ const CAPABILITY_FANSPEED = 'fan_speed';
 const CAPABILITY_WIND_ANGLE = 'measure_wind_angle';
 const CAPABILITY_WIND_STRENGTH = 'measure_wind_strength';
 
+const CAPABILITY_CUMULATIVE_POWER_HIGH = "power_meter_cumulative_high";
+const CAPABILITY_CUMULATIVE_POWER_LOW = "power_meter_cumulative_low";
+const CAPABILITY_CUMULATIVE_GAS = "gas_meter_cumulative";
+
 class DomoticzDriver extends Homey.Driver{
 
     onInit(){
@@ -109,6 +113,34 @@ class DomoticzDriver extends Homey.Driver{
 
     }
 
+    getMeterValue(data, type){
+        Homey.app.doLog("Meter standen ophalen");
+        Homey.app.doLog("Type: "+type);
+        Homey.app.doLog("Data: "+data);
+        let value = 0;
+        let rawData = data.split(";");
+        if(data == null || data === ""){
+            value = 0;
+        }
+
+        switch(type){
+            case 'T1':
+                value = parseFloat(rawData[0]);
+                break;
+            case 'T2':
+                value = parseFloat(rawData[1]);
+                break;
+            case 'R1':
+                value = 0;
+                break;
+            case 'R2':
+                value = 0;
+                break;
+        }
+        Homey.app.doLog("Value to return :"+value);
+        return value;
+    }
+
     _updateInternalState(device,data){
 
 
@@ -143,15 +175,27 @@ class DomoticzDriver extends Homey.Driver{
                     break;
                 case CAPABILITY_METER_GAS:
                     value = parseFloat(data.CounterToday.split(" ")[0]);
-
+                    break;
+                case CAPABILITY_CUMULATIVE_GAS:
+                    if(data.hasOwnProperty("Data") && (data.Data != null && data.Data !== "")) {
+                        value = parseFloat(data.Data);
+                    }
                     break;
                 case CAPABILITY_MEASURE_POWER:
                     value = parseFloat(data.Usage.split(" ")[0]);
-
                     break;
                 case CAPABILITY_METER_POWER:
                     value = parseFloat(data.CounterToday.split(" ")[0]);
-
+                    break;
+                case CAPABILITY_CUMULATIVE_POWER_HIGH:
+                    if(data.hasOwnProperty("Data") && (data.Data !== null && data.Data!=="")){
+                        value = this.getMeterValue(data.Data,"T1");
+                    }
+                    break;
+                case CAPABILITY_CUMULATIVE_POWER_LOW:
+                    if(data.hasOwnProperty("Data") && (data.Data !== null && data.Data!=="")){
+                        value = this.getMeterValue(data.Data,"T2");
+                    }
                     break;
                 case CAPABILITY_TARGET_TEMPERATURE:
                     value = parseFloat(data.SetPoint);
@@ -306,10 +350,13 @@ class DomoticzDriver extends Homey.Driver{
         switch(deviceEntry.SubType){
             case 'Gas':
                 capabilities.push(CAPABILITY_METER_GAS);
+                capabilities.push(CAPABILITY_CUMULATIVE_GAS);
                 break;
             case 'Energy':
                 capabilities.push(CAPABILITY_MEASURE_POWER);
                 capabilities.push(CAPABILITY_METER_POWER);
+                capabilities.push(CAPABILITY_CUMULATIVE_POWER_HIGH);
+                capabilities.push(CAPABILITY_CUMULATIVE_POWER_LOW);
                 break;
             case 'Fan':
                 capabilities.push(CAPABILITY_FANSPEED);

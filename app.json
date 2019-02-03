@@ -1,6 +1,6 @@
 {
   "id": "eu.jeroensomhorst.domoticz",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "compatibility": ">=1.5.0",
   "sdk": 2,
   "name": {
@@ -35,6 +35,36 @@
         "en": "RPM",
         "nl": "RPM"
       }
+    },
+    "power_meter_cumulative_high": {
+      "type": "number",
+      "title": {
+        "en": "Power reading T1",
+        "nl": "Meterstand T1"
+      },
+      "getable": true,
+      "setable": false,
+      "icon": "/assets/capabilities/electricity_meter.svg"
+    },
+    "power_meter_cumulative_low": {
+      "type": "number",
+      "title": {
+        "en": "Power reading T2",
+        "nl": "Meterstand T2"
+      },
+      "getable": true,
+      "setable": false,
+      "icon": "/assets/capabilities/electricity_meter.svg"
+    },
+    "gas_meter_cumulative": {
+      "type": "number",
+      "title": {
+        "en": "Gas counter total",
+        "nl": "Gas meter totaal"
+      },
+      "getable": true,
+      "setable": false,
+      "icon": "assets/capabilities/gas_meter.svg"
     }
   },
   "drivers": [

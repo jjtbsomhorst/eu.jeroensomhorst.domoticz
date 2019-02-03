@@ -2,6 +2,8 @@
 
 Add support for Domoticz devices
 
+0.1.0 Added cumulative meter readers for T1, T2, Gas
+
 0.0.9 The app now only reads information from devices that are used in domoticz
 
 0.0.8 Added support for no username/password situations. 
