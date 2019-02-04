@@ -18,8 +18,12 @@ const CAPABILITY_WIND_STRENGTH = 'measure_wind_strength';
 const CAPABILITY_CUMULATIVE_POWER_HIGH = "power_meter_cumulative_high";
 const CAPABILITY_CUMULATIVE_POWER_LOW = "power_meter_cumulative_low";
 const CAPABILITY_CUMULATIVE_GAS = "gas_meter_cumulative";
+const CAPABILITY_MEASURE_VOLTAGE = "measure_voltage";
+const CAPABILITY_MEASURE_RAIN = "measure_rain";
+const CAPABILITY_METER_RAIN = "meter_rain";
 
 class DomoticzDriver extends Homey.Driver{
+
 
     onInit(){
         Homey.app.doLog("Initialize driver");
@@ -218,6 +222,17 @@ class DomoticzDriver extends Homey.Driver{
                     value = parseFloat(windStrength[3])/10;
                     value = value * 3.6;
                     break;
+                case CAPABILITY_METER_RAIN:
+                    value = parseFloat(data.Rain);
+                    break;
+                case CAPABILITY_MEASURE_RAIN:
+                    value = parseFloat(data.RainRate);
+                    break;
+                case CAPABILITY_MEASURE_VOLTAGE:
+                    value = parseFloat(data.Voltage);
+                    break;
+
+                // TODO Add rain and voltage stuff;
             }
 
             if(value !== null){
@@ -333,8 +348,6 @@ class DomoticzDriver extends Homey.Driver{
                 if(deviceEntry.hasOwnProperty('HaveDimmer') && deviceEntry.HaveDimmer === true && deviceEntry.DimmerType !== "none"){
                     capabilities.push('dim');
                 }
-
-                capabilities.push(CAPABILITY_ONOFF);
                 break;
             case 'Color Switch':
                 // TODO need to find a way to dimm the lights.
@@ -344,6 +357,18 @@ class DomoticzDriver extends Homey.Driver{
                 capabilities.push(CAPABILITY_WIND_ANGLE);
                 capabilities.push(CAPABILITY_WIND_STRENGTH);
                 break;
+            case 'Rain':
+                if(deviceEntry.hasOwnProperty('Rain')){
+                    capabilities.push(CAPABILITY_MEASURE_RAIN);
+                }
+
+                if(deviceEntry.hasOwnProperty('RainRate')){
+                    capabilities.push(CAPABILITY_METER_RAIN);
+                }
+                break;
+            case 'Security':
+                break;
+
 
         }
 
@@ -358,11 +383,23 @@ class DomoticzDriver extends Homey.Driver{
                 capabilities.push(CAPABILITY_CUMULATIVE_POWER_HIGH);
                 capabilities.push(CAPABILITY_CUMULATIVE_POWER_LOW);
                 break;
+            case 'WTGR800':
+                if(deviceEntry.hasOwnProperty('Humidity')){
+                    capabilities.push(CAPABILITY_MEASURE_HUMIDITY);
+                }
+
+                if(deviceEntry.hasOwnProperty('Temp' )){
+                    capabilities.push(CAPABILITY_TARGET_TEMPERATURE);
+                }
+                break;
             case 'Fan':
                 capabilities.push(CAPABILITY_FANSPEED);
                 break;
             case 'SetPoint':
                 capabilities.push(CAPABILITY_TARGET_TEMPERATURE);
+                break;
+            case 'Voltage':
+                capabilities.push(CAPABILITY_MEASURE_VOLTAGE);
                 break;
         }
         Homey.app.doLog("Capabilities found: ");
