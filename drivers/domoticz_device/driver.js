@@ -331,42 +331,47 @@ class DomoticzDriver extends Homey.Driver{
     }
 
     getDeviceCapabilities(deviceEntry){
-        let capabilities = [];
+        let capabilities = new Set();
         Homey.app.doLog("Get capabilities for device");
         Homey.app.doLog(deviceEntry.idx);
         switch(deviceEntry.Type){
             case 'Humidity':
-                capabilities.push(CAPABILITY_MEASURE_HUMIDITY);
+                capabilities.add(CAPABILITY_MEASURE_HUMIDITY);
                 break;
             case 'Temp':
-                capabilities.push(CAPABILITY_MEASURE_TEMPERATURE);
+                capabilities.add(CAPABILITY_MEASURE_TEMPERATURE);
                 break;
             case 'Light/Switch':
             case 'Lighting2':
             case 'Lighting 2':
-                capabilities.push(CAPABILITY_ONOFF);
+                capabilities.add(CAPABILITY_ONOFF);
                 if(deviceEntry.hasOwnProperty('HaveDimmer') && deviceEntry.HaveDimmer === true && deviceEntry.DimmerType !== "none"){
-                    capabilities.push('dim');
+                    capabilities.add('dim');
                 }
                 break;
             case 'Color Switch':
                 // TODO need to find a way to dimm the lights.
-                capabilities.push(CAPABILITY_ONOFF);
+                capabilities.add(CAPABILITY_ONOFF);
                 break;
             case 'Wind':
-                capabilities.push(CAPABILITY_WIND_ANGLE);
-                capabilities.push(CAPABILITY_WIND_STRENGTH);
+                capabilities.add(CAPABILITY_WIND_ANGLE);
+                capabilities.add(CAPABILITY_WIND_STRENGTH);
                 break;
             case 'Rain':
                 if(deviceEntry.hasOwnProperty('Rain')){
-                    capabilities.push(CAPABILITY_MEASURE_RAIN);
+                    capabilities.add(CAPABILITY_MEASURE_RAIN);
                 }
 
                 if(deviceEntry.hasOwnProperty('RainRate')){
-                    capabilities.push(CAPABILITY_METER_RAIN);
+                    capabilities.add(CAPABILITY_METER_RAIN);
                 }
                 break;
             case 'Security':
+                break;
+            case 'Usage':
+                if(deviceEntry.SubType === "Electric"){
+                    capabilities.add(CAPABILITY_MEASURE_POWER);
+                }
                 break;
 
 
@@ -374,32 +379,32 @@ class DomoticzDriver extends Homey.Driver{
 
         switch(deviceEntry.SubType){
             case 'Gas':
-                capabilities.push(CAPABILITY_METER_GAS);
-                capabilities.push(CAPABILITY_CUMULATIVE_GAS);
+                capabilities.add(CAPABILITY_METER_GAS);
+                capabilities.add(CAPABILITY_CUMULATIVE_GAS);
                 break;
             case 'Energy':
-                capabilities.push(CAPABILITY_MEASURE_POWER);
-                capabilities.push(CAPABILITY_METER_POWER);
-                capabilities.push(CAPABILITY_CUMULATIVE_POWER_HIGH);
-                capabilities.push(CAPABILITY_CUMULATIVE_POWER_LOW);
+                capabilities.add(CAPABILITY_MEASURE_POWER);
+                capabilities.add(CAPABILITY_METER_POWER);
+                capabilities.add(CAPABILITY_CUMULATIVE_POWER_HIGH);
+                capabilities.add(CAPABILITY_CUMULATIVE_POWER_LOW);
                 break;
             case 'WTGR800':
                 if(deviceEntry.hasOwnProperty('Humidity')){
-                    capabilities.push(CAPABILITY_MEASURE_HUMIDITY);
+                    capabilities.add(CAPABILITY_MEASURE_HUMIDITY);
                 }
 
                 if(deviceEntry.hasOwnProperty('Temp' )){
-                    capabilities.push(CAPABILITY_TARGET_TEMPERATURE);
+                    capabilities.add(CAPABILITY_TARGET_TEMPERATURE);
                 }
                 break;
             case 'Fan':
-                capabilities.push(CAPABILITY_FANSPEED);
+                capabilities.add(CAPABILITY_FANSPEED);
                 break;
             case 'SetPoint':
-                capabilities.push(CAPABILITY_TARGET_TEMPERATURE);
+                capabilities.add(CAPABILITY_TARGET_TEMPERATURE);
                 break;
             case 'Voltage':
-                capabilities.push(CAPABILITY_MEASURE_VOLTAGE);
+                capabilities.add(CAPABILITY_MEASURE_VOLTAGE);
                 break;
         }
         Homey.app.doLog("Capabilities found: ");

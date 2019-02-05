@@ -96,5 +96,12 @@
 
       ]
     }
-]
+  ],
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "j.somhorst@gmail.com"
+      }
+    }
+  }
 }
