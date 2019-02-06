@@ -13,20 +13,27 @@ class DomoticzDevice extends Homey.Device{
     }
 
     onAdded(){
-
+        this.getDriver().onDeviceAdd(this);
     }
 
     onDeleted(){
-
+        this.getDriver().onDeviceRemove(this);
     }
 
     onCapabilityChange(values,opts){
+        // noinspection JSUnresolvedVariable
         Homey.app.doLog("Capabilities have changed");
+        // noinspection JSUnresolvedVariable
         Homey.app.doLog("-----");
+        // noinspection JSUnresolvedVariable
         Homey.app.doLog(values);
+        // noinspection JSUnresolvedVariable
         Homey.app.doLog("-----");
+        // noinspection JSUnresolvedVariable
         Homey.app.doLog(opts);
+        // noinspection JSUnresolvedVariable
         Homey.app.doLog("-----");
+        // noinspection JSUnresolvedVariable
         if(this.getDriver().updateExternalState(values,this)){
             return Promise.resolve(true);
         }else{
@@ -37,4 +44,5 @@ class DomoticzDevice extends Homey.Device{
 
 }
 
+// noinspection JSUnresolvedVariable
 module.exports = DomoticzDevice;

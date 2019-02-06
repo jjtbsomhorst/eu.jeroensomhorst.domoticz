@@ -11,10 +11,10 @@ module.exports = [
         fn: function(req,callback){
             let args = req.body;
             var dm = new Domoticz(args.username,args.password,args.host,args.port);
-            dm.doLogin().then((data)=>{
+            dm.doLogin().then(()=>{
                 callback(null,true);
             }).catch((error)=>{
-                callback(null,false);
+                callback(error,false);
             });
         }
     },
@@ -22,15 +22,15 @@ module.exports = [
         method: 'DELETE',
         path: 'logs',
         fn: function (req, callback) {
-            const result = Homey.app.deleteLogs();
-            callback(null, result);
+
+            callback(null, true);
         }
     },
     {
         method: 'GET',
         path: 'logs',
         fn: function(req,callback){
-            callback(null, Homey.app.getLogs());
+            callback(null, {"id": "Feature disabled"});
         }
     }
 ];

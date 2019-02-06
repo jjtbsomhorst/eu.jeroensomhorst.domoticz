@@ -22,54 +22,77 @@ const CAPABILITY_MEASURE_VOLTAGE = "measure_voltage";
 const CAPABILITY_MEASURE_RAIN = "measure_rain";
 const CAPABILITY_METER_RAIN = "meter_rain";
 
+const CRONTASK_GETDEVICESTATE = "eu.jeroensomhorst.domoticz.cron.devicestate";
+
+
 class DomoticzDriver extends Homey.Driver{
 
 
     onInit(){
         Homey.app.doLog("Initialize driver");
-        let d = this.getDomoticz();
-        if(d) {
-            this._intervalId = setInterval(() => {
-                this.onCronRun();
-            }, 1000);
 
-        }
+        this.deviceList = new Map();
+
+        this.getDevices().forEach((d)=>{
+            this.deviceList.set(d.getData().idx,d);
+        });
+
+        Homey.ManagerCron.getTask(CRONTASK_GETDEVICESTATE)
+            .then(task => {
+                Homey.app.doLog("The task exists: " + CRONTASK_GETDEVICESTATE);
+                task.on('run', () => this.onCronRun());
+            })
+            .catch(err => {
+                if (err.code === 404) {
+                    this.log("The task has not been registered yet, registering task: " + CRONTASK_GETDEVICESTATE);
+                    Homey.ManagerCron.registerTask(CRONTASK_GETDEVICESTATE, "* * * * * *", {})
+                        .then(task => {
+                            task.on('run', () => this.onCronRun());
+                        })
+                        .catch(err => {
+                            Homey.app.doError(`problem with registering cronjob: ${err.message}`);
+                        });
+                } else {
+                    Homey.app.doError(`other cron error: ${err.message}`);
+                }
+            });
 
         this.lastUpdates = new Map();
 
     }
 
+    onDeviceAdd(d){
+        this.deviceList.set(d.getData().idx,d);
+    }
+
+    onDeviceRemove(device){
+        let data = device.getData();
+
+        if(this.deviceList.has(data.idx)){
+            this.deviceList.delete(data.idx);
+        }
+    }
+
+
     onCronRun(){
         Homey.app.doLog("Retrieve devices");
-        let devices = this.getDevices();
-
-        if(devices.length === 0){ // only continue if we have devices;
+        if(this.deviceList.size === 0){
             Homey.app.doLog("No devices configured yet. Skip");
-            return true;
+            return;
         }
+
+
         let domoticz = this.getDomoticz();
         if(!domoticz){
             Homey.app.doLog("Domoticz api not initialized");
             return false;
         }
 
-        // put devices in map based on idx;
-
-        let deviceMap = new Map();
-
-        devices.forEach((d)=>{
-            deviceMap.set(d.getData().idx,d);
-        });
-        //Homey.app.doLog("Update internal state of devices");
-        this.getDomoticz().findDevice(null, null, null).then((result) => {
-                //Homey.app.doLog("Device info retrieved");
-                //Homey.app.doLog("------");
-                //Homey.app.doLog(result);
-                //Homey.app.doLog("------");
+        domoticz.findDevice(null, null, null).then((result) => {
                 result.forEach((element) => {
-                    if(deviceMap.has(element.idx)){ // found the device
+                    if(this.deviceList.has(element.idx)){ // found the device
 
-                        let device = deviceMap.get(element.idx);
+                        let device = this.deviceList.get(element.idx);
                         this._updateInternalState(device,element);
                     }
                 });
@@ -89,7 +112,7 @@ class DomoticzDriver extends Homey.Driver{
         Object.keys(values).forEach((key)=>{
            switch(key){
                case CAPABILITY_ONOFF:
-                   var switchcommand = (values[key] === true ? 'On' : 'Off');
+                   let switchcommand = (values[key] === true ? 'On' : 'Off');
 
                    this.domoticz.updateDevice('switchlight',idx,switchcommand,null).then((data)=>{
                         Homey.app.doLog('Succesfully updated state external');
@@ -117,32 +140,25 @@ class DomoticzDriver extends Homey.Driver{
 
     }
 
-    getMeterValue(data, type){
-        Homey.app.doLog("Meter standen ophalen");
-        Homey.app.doLog("Type: "+type);
-        Homey.app.doLog("Data: "+data);
-        let value = 0;
+    static getMeterValue(data, type){
+
         let rawData = data.split(";");
         if(data == null || data === ""){
-            value = 0;
+            return 0;
         }
 
         switch(type){
             case 'T1':
-                value = parseFloat(rawData[0]);
-                break;
+                return parseFloat(rawData[0]);
             case 'T2':
-                value = parseFloat(rawData[1]);
-                break;
+                return parseFloat(rawData[1]);
             case 'R1':
-                value = 0;
-                break;
+                return 0;
+
             case 'R2':
-                value = 0;
-                break;
+                return 0;
+
         }
-        Homey.app.doLog("Value to return :"+value);
-        return value;
     }
 
     _updateInternalState(device,data){
@@ -153,13 +169,11 @@ class DomoticzDriver extends Homey.Driver{
             let timeStamp = this.lastUpdates.get(data.idx);
 
             if(timeStamp === data.LastUpdate){
-                //Homey.app.doLog('Ignore device update for '+data.idx);
+                Homey.app.doLog('Ignore device update for '+data.idx);
                 return true;
             }
         }
         Homey.app.doLog("Update internal state of device");
-        Homey.app.doLog("Device: ");
-        Homey.app.doLog(device);
 
         device.getCapabilities().forEach((element)=>{
 
@@ -193,12 +207,12 @@ class DomoticzDriver extends Homey.Driver{
                     break;
                 case CAPABILITY_CUMULATIVE_POWER_HIGH:
                     if(data.hasOwnProperty("Data") && (data.Data !== null && data.Data!=="")){
-                        value = this.getMeterValue(data.Data,"T1");
+                        value = DomoticzDriver.getMeterValue(data.Data,"T1");
                     }
                     break;
                 case CAPABILITY_CUMULATIVE_POWER_LOW:
                     if(data.hasOwnProperty("Data") && (data.Data !== null && data.Data!=="")){
-                        value = this.getMeterValue(data.Data,"T2");
+                        value = DomoticzDriver.getMeterValue(data.Data,"T2");
                     }
                     break;
                 case CAPABILITY_TARGET_TEMPERATURE:
@@ -254,7 +268,8 @@ class DomoticzDriver extends Homey.Driver{
 
     getDomoticz(){
         if(this.domoticz == null){
-            this.domoticz = new Domoticz().fromSettings();
+            Homey.app.doLog('Initialize new domoticz class');
+            this.domoticz = Domoticz.fromSettings();
         }
 
         return this.domoticz;
@@ -335,40 +350,44 @@ class DomoticzDriver extends Homey.Driver{
         Homey.app.doLog("Get capabilities for device");
         Homey.app.doLog(deviceEntry.idx);
         switch(deviceEntry.Type){
-            case 'Humidity':
+            case "Humidity":
                 capabilities.add(CAPABILITY_MEASURE_HUMIDITY);
                 break;
-            case 'Temp':
+            case "Temp":
                 capabilities.add(CAPABILITY_MEASURE_TEMPERATURE);
                 break;
-            case 'Light/Switch':
-            case 'Lighting2':
-            case 'Lighting 2':
+            case "Temp + Humidity":
+                capabilities.add(CAPABILITY_MEASURE_TEMPERATURE);
+                capabilities.add(CAPABILITY_MEASURE_HUMIDITY);
+                break;
+            case "Light/Switch":
+            case "Lighting2":
+            case "Lighting 2":
                 capabilities.add(CAPABILITY_ONOFF);
-                if(deviceEntry.hasOwnProperty('HaveDimmer') && deviceEntry.HaveDimmer === true && deviceEntry.DimmerType !== "none"){
-                    capabilities.add('dim');
+                if(deviceEntry.hasOwnProperty("HaveDimmer") && deviceEntry.HaveDimmer === true && deviceEntry.DimmerType !== "none"){
+                    capabilities.add("dim");
                 }
                 break;
-            case 'Color Switch':
+            case "Color Switch":
                 // TODO need to find a way to dimm the lights.
                 capabilities.add(CAPABILITY_ONOFF);
                 break;
-            case 'Wind':
+            case "Wind":
                 capabilities.add(CAPABILITY_WIND_ANGLE);
                 capabilities.add(CAPABILITY_WIND_STRENGTH);
                 break;
-            case 'Rain':
-                if(deviceEntry.hasOwnProperty('Rain')){
+            case "Rain":
+                if(deviceEntry.hasOwnProperty("Rain")){
                     capabilities.add(CAPABILITY_MEASURE_RAIN);
                 }
 
-                if(deviceEntry.hasOwnProperty('RainRate')){
+                if(deviceEntry.hasOwnProperty("RainRate")){
                     capabilities.add(CAPABILITY_METER_RAIN);
                 }
                 break;
-            case 'Security':
+            case "Security":
                 break;
-            case 'Usage':
+            case "Usage":
                 if(deviceEntry.SubType === "Electric"){
                     capabilities.add(CAPABILITY_MEASURE_POWER);
                 }
@@ -378,32 +397,32 @@ class DomoticzDriver extends Homey.Driver{
         }
 
         switch(deviceEntry.SubType){
-            case 'Gas':
+            case "Gas":
                 capabilities.add(CAPABILITY_METER_GAS);
                 capabilities.add(CAPABILITY_CUMULATIVE_GAS);
                 break;
-            case 'Energy':
+            case "Energy":
                 capabilities.add(CAPABILITY_MEASURE_POWER);
                 capabilities.add(CAPABILITY_METER_POWER);
                 capabilities.add(CAPABILITY_CUMULATIVE_POWER_HIGH);
                 capabilities.add(CAPABILITY_CUMULATIVE_POWER_LOW);
                 break;
-            case 'WTGR800':
-                if(deviceEntry.hasOwnProperty('Humidity')){
+            case "WTGR800":
+                if(deviceEntry.hasOwnProperty("Humidity")){
                     capabilities.add(CAPABILITY_MEASURE_HUMIDITY);
                 }
 
-                if(deviceEntry.hasOwnProperty('Temp' )){
+                if(deviceEntry.hasOwnProperty("Temp" )){
                     capabilities.add(CAPABILITY_TARGET_TEMPERATURE);
                 }
                 break;
-            case 'Fan':
+            case "Fan":
                 capabilities.add(CAPABILITY_FANSPEED);
                 break;
-            case 'SetPoint':
+            case "SetPoint":
                 capabilities.add(CAPABILITY_TARGET_TEMPERATURE);
                 break;
-            case 'Voltage':
+            case "Voltage":
                 capabilities.add(CAPABILITY_MEASURE_VOLTAGE);
                 break;
         }
@@ -415,35 +434,33 @@ class DomoticzDriver extends Homey.Driver{
 
     onPairListDevices( data, callback ) {
         Homey.app.doLog("On pair list devices");
-        let currentDevices = this.getDevices();
+
         let domoticz = this.getDomoticz();
         if(!domoticz){
             callback(false,"kapot");
             return;
         }
 
-        let keys = [];
-        currentDevices.forEach((d)=>{
-            keys.push(d.getData().idx);
-        });
+
+
 
         domoticz.findDevice(null,null,null).then((result)=>{
             let devices = [];
 
             result.forEach((element)=>{
-                if(keys.indexOf(element.idx) < 0 ) {
-                    if(element.hasOwnProperty('Used') && element.Used === 1){
+                if(!this.deviceList.has(element.idx)){
+                    if(element.hasOwnProperty("Used") && element.Used === 1){
 
                         let capabilities = this.getDeviceCapabilities(element);
                         let deviceClass = this.getDeviceClass(element);
                         Homey.app.doLog(capabilities);
                         Homey.app.doLog(deviceClass);
 
-                        if(capabilities.length > 0 && deviceClass != null){
+                        if(capabilities.size > 0 && deviceClass != null){
                             devices.push({
                                 "name": element.Name || DEVICE_DEFAULT_NAME,
                                 "class": deviceClass,
-                                "capabilities": capabilities,
+                                "capabilities": Array.from(capabilities),
                                 "data": {
                                     id: this.guid(),
                                     idx: element.idx,
