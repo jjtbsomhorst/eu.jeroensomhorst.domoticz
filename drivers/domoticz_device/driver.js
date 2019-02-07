@@ -169,27 +169,15 @@ class DomoticzDriver extends Homey.Driver{
             let timeStamp = this.lastUpdates.get(data.idx);
 
             if(timeStamp === data.LastUpdate){
-                Homey.app.doLog('Ignore device update for '+data.idx);
                 return true;
             }
         }
-        Homey.app.doLog("Update internal state of device");
 
         device.getCapabilities().forEach((element)=>{
-            Homey.app.doLog("Capability: "+element);
             let value = null;
-
             switch(element){
                 case CAPABILITY_ONOFF:
-                    switch(data.Status){
-                        case 'Off':
-                            value = false;
-                            break;
-                        default:
-                            value = true;
-
-                            break;
-                    }
+                    value = (data.Status !== "Off");
                     break;
                 case CAPABILITY_METER_GAS:
                     value = parseFloat(data.CounterToday.split(" ")[0]);
@@ -451,7 +439,7 @@ class DomoticzDriver extends Homey.Driver{
 
             result.forEach((element)=>{
                 if(!this.deviceList.has(element.idx)){
-                    if(element.hasOwnProperty("Used") && element.Used === 1){
+
 
                         let capabilities = this.getDeviceCapabilities(element);
                         let deviceClass = this.getDeviceClass(element);
@@ -472,9 +460,6 @@ class DomoticzDriver extends Homey.Driver{
                             Homey.app.doLog("Could not determine device class or capabilities for device");
                             Homey.app.doLog(element);
                         }
-
-
-                    }
 
 
                 }
