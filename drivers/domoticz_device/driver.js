@@ -89,7 +89,6 @@ class DomoticzDriver extends Homey.Driver{
         }
 
         domoticz.findDevice(null, null, null).then((result) => {
-
                 result.forEach((element) => {
                     if(this.deviceList.has(element.idx)){ // found the device
 
