@@ -9,6 +9,7 @@ class DomoticzApp extends Homey.App {
 	onInit() {
 
 		this.doLog('Domoticz app started');
+		this.doLog("Version: "+this.manifest.version);
 
 		Homey.on('unload',()=>{
 			this.doLog('Domoticz app unloaded');

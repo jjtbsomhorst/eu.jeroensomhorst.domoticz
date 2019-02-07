@@ -89,6 +89,7 @@ class DomoticzDriver extends Homey.Driver{
         }
 
         domoticz.findDevice(null, null, null).then((result) => {
+
                 result.forEach((element) => {
                     if(this.deviceList.has(element.idx)){ // found the device
 
@@ -176,7 +177,7 @@ class DomoticzDriver extends Homey.Driver{
         Homey.app.doLog("Update internal state of device");
 
         device.getCapabilities().forEach((element)=>{
-
+            Homey.app.doLog("Capability: "+element);
             let value = null;
 
             switch(element){
@@ -250,6 +251,8 @@ class DomoticzDriver extends Homey.Driver{
             }
 
             if(value !== null){
+                Homey.app.doLog('Setting capability value');
+
                 device.setCapabilityValue(element,value,(err)=>{
                    if(err){
                        Homey.app.doError(' ----- Unsuccesfull updating capability ------');
