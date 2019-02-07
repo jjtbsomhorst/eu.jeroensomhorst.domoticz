@@ -254,7 +254,7 @@ class DomoticzDriver extends Homey.Driver{
 
                 device.setCapabilityValue(element,value,(err)=>{
                    if(err){
-                       Homey.app.doError(' ----- Unsuccesfull updating capability ------');
+                       Homey.app.doError(' ----- Unsuccessful updating capability ------');
                        Homey.app.doError(element);
                        Homey.app.doError(value);
                        Homey.app.doError(err);
