@@ -1,6 +1,6 @@
 {
   "id": "eu.jeroensomhorst.domoticz",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "compatibility": ">=1.5.0",
   "sdk": 2,
   "name": {
@@ -100,7 +100,7 @@
   "contributing": {
     "donate": {
       "paypal": {
-        "username": "j.somhorst@gmail.com"
+        "username": "jjtbsomhorst"
       }
     }
   }

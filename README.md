@@ -2,6 +2,8 @@
 
 Add support for Domoticz devices
 
+0.1.2 Fixed contribution link
+
 0.1.1 Fixed a memory leak in the Domoticz api. 
 
 0.1.0 Added cumulative meter readers for T1, T2, Gas. For this to work you need to repair the device(s)
