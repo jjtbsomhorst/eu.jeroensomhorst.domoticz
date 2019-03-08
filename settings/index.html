@@ -4,23 +4,21 @@
     </head>
     <body>
         <div id="Settings">
-            <h1>Domoticz server settings</h1>
-
             <form>
-                <label for="host">Hostname/IP adres</label>
-                <input type="text" name="hostname" placeholder="hostname"/><br/>
-                <label for="port">Port</label>
-                <input type="text" name="port" placeholder="port"/><br/>
-                <label for="username">Username</label>
-                <input type="text" name="username" placeholder="username"/><br/>
-                <label for="password">Password</label>
-                <input type="password" name="password" placeholder="password"/><br/>
-                <button type="button" onclick="doSubmit()">Save</button>
+                <label for="hostname" data-i18n="settings.hostname">Hostname/IP adres</label>
+                <input type="text" id="hostname" name="hostname" placeholder="hostname"/><br/>
+                <label for="port" data-i18n="settings.port">Port</label>
+                <input type="text" id="port" name="port" placeholder="port"/><br/>
+                <label for="username" data-i18n="settings.username">Username</label>
+                <input type="text" id="username" name="username" placeholder="username"/><br/>
+                <label for="password" data-i18n="settings.password">Password</label>
+                <input type="password" id="password" name="password" placeholder="password"/><br/>
+                <button type="button" onclick="doSubmit()" data-i18n="settings.save">Save</button>
             </form>
         </div>
         <div id="logging">
-            <button class="right" id="refreshLog" onclick="refreshLog()">Refresh</button>
-            <button class="right" id="deleteLog" onclick="deleteLog()">Delete</button>
+            <button class="right" id="refreshLog" onclick="refreshLog()" data-i18n="settings.refresh">Refresh</button>
+            <button class="right" id="deleteLog" onclick="deleteLog()" data-i18n="settings.remove">Delete</button>
             <textarea id="log" style="width: 98%; height: 100%;" rows="50"></textarea>
         </div>
 

@@ -1,0 +1,11 @@
+{
+  "settings": {
+    "hostname": "Hostname / IP-Adresse",
+    "port": "Ports",
+    "username": "Nutzername",
+    "password": "Passwort",
+    "save": "speichern",
+    "refresh": "erfrischen",
+    "remove": "löschen"
+  }
+}

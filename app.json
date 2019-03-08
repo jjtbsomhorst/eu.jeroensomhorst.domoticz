@@ -4,10 +4,13 @@
   "compatibility": ">=1.5.0",
   "sdk": 2,
   "name": {
-    "en": "Domoticz app "
+    "en": "Domoticz App",
+    "de": "Domoticz App"
   },
   "description": {
-    "en": "Add support for Domoticz devices"
+    "en": "Add support for Domoticz devices",
+    "nl": "Voegt support voor Domoticz apparaten toe",
+    "de": "Fügt Support für Domoticz-Geräte hinzu"
   },
   "category": [
     "energy","tools"
@@ -15,13 +18,13 @@
   "permissions": [],
   "images": {
     "large": "assets/domoticz_large.jpg",
-
     "small": "assets/domoticz_small.jpg"
   },
   "author": {
     "name": "Jeroen Somhorst",
     "email": "j.somhorst@gmail.com"
   },
+
   "capabilities":{
     "fan_speed": {
       "type" : "number",
