@@ -1,7 +1,5 @@
 'use strict';
 
-
-const Homey = require('homey');
 const Domoticz = require('domoticz');
 
 module.exports = [

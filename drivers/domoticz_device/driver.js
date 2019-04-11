@@ -31,12 +31,6 @@ class DomoticzDriver extends Homey.Driver{
     onInit(){
         Homey.app.doLog("Initialize driver");
 
-        this.deviceList = new Map();
-
-        this.getDevices().forEach((d)=>{
-            this.deviceList.set(d.getData().idx,d);
-        });
-
         Homey.ManagerCron.getTask(CRONTASK_GETDEVICESTATE)
             .then(task => {
                 Homey.app.doLog("The task exists: " + CRONTASK_GETDEVICESTATE);
@@ -62,25 +56,33 @@ class DomoticzDriver extends Homey.Driver{
     }
 
     onDeviceAdd(d){
-        this.deviceList.set(d.getData().idx,d);
+      //  this.deviceList.set(d.getData().idx,d);
     }
 
     onDeviceRemove(device){
+        /*
         let data = device.getData();
 
         if(this.deviceList.has(data.idx)){
             this.deviceList.delete(data.idx);
         }
+        */
     }
 
 
     onCronRun(){
         Homey.app.doLog("Retrieve devices");
-        if(this.deviceList.size === 0){
+        let devices = this.getDevices();
+        if(devices == null || devices.size === 0){
             Homey.app.doLog("No devices configured yet. Skip");
             return;
         }
 
+        let deviceList = new Map();
+
+        this.getDevices().forEach((d)=>{
+            deviceList.set(d.getData().idx,d);
+        });
 
         let domoticz = this.getDomoticz();
         if(!domoticz){
@@ -90,9 +92,9 @@ class DomoticzDriver extends Homey.Driver{
 
         domoticz.findDevice(null, null, null).then((result) => {
                 result.forEach((element) => {
-                    if(this.deviceList.has(element.idx)){ // found the device
+                    if(deviceList.has(element.idx)){ // found the device
 
-                        let device = this.deviceList.get(element.idx);
+                        let device = deviceList.get(element.idx);
                         this._updateInternalState(device,element);
                     }
                 });
@@ -163,17 +165,8 @@ class DomoticzDriver extends Homey.Driver{
 
     _updateInternalState(device,data){
 
-
-
-        if(this.lastUpdates.has(data.idx)){
-            let timeStamp = this.lastUpdates.get(data.idx);
-
-            if(timeStamp === data.LastUpdate){
-                return true;
-            }
-        }
-
         device.getCapabilities().forEach((element)=>{
+            let oldValue = device.getCapabilityValue(element);
             let value = null;
             switch(element){
                 case CAPABILITY_ONOFF:
@@ -209,6 +202,9 @@ class DomoticzDriver extends Homey.Driver{
                 case CAPABILITY_MEASURE_TEMPERATURE:
                     value = data.Temp;
                     break;
+                case CAPABILITY_MEASURE_HUMIDITY:
+                    value = data.Humidity;
+                    break;
                 case CAPABILITY_FANSPEED:
                     let rpm = data.Data.toLowerCase();
                     rpm = rpm.replace('RPM','');
@@ -233,12 +229,11 @@ class DomoticzDriver extends Homey.Driver{
                 case CAPABILITY_MEASURE_VOLTAGE:
                     value = parseFloat(data.Voltage);
                     break;
-
-                // TODO Add rain and voltage stuff;
             }
-
-            if(value !== null){
+            if(value !== null && value !== oldValue){
                 Homey.app.doLog('Setting capability value');
+                Homey.app.doLog('Value before: '+oldValue);
+                Homey.app.doLog('Value after: '+value);
 
                 device.setCapabilityValue(element,value,(err)=>{
                    if(err){
@@ -251,9 +246,6 @@ class DomoticzDriver extends Homey.Driver{
             }
 
         });
-
-
-        this.lastUpdates.set(data.idx,data.LastUpdate);
     }
 
     getDomoticz(){
@@ -403,7 +395,7 @@ class DomoticzDriver extends Homey.Driver{
                 }
 
                 if(deviceEntry.hasOwnProperty("Temp" )){
-                    capabilities.add(CAPABILITY_TARGET_TEMPERATURE);
+                    capabilities.add(CAPABILITY_MEASURE_TEMPERATURE);
                 }
                 break;
             case "Fan":

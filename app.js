@@ -2,8 +2,6 @@
 
 const Homey = require('homey');
 
-// enable for profiling
-//require('inspector').open(9229, '0.0.0.0', false)
 class DomoticzApp extends Homey.App {
 
 	onInit() {

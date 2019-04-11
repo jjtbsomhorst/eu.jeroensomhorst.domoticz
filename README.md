@@ -2,6 +2,8 @@
 
 Add support for Domoticz devices
 
+* 0.1.4 Fixed the capability for the WTGR800 device(s) and some smaller optimizations
+
 * 0.1.3 Added German translations. Thanks to Marco David
 
 * 0.1.2 Fixed contribution link
