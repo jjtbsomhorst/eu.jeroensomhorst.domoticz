@@ -1,5 +1,6 @@
 # Domoticz app 
 
+
 Add support for Domoticz devices
 
 * 0.1.5 Refactored the code moved from driver only to device driven. This seems to decrease memory usage?
@@ -25,3 +26,7 @@ Add support for Domoticz devices
 * 0.0.5: Added basic support for weather information (wind)
   
 * 0.0.4: Added basic support for temperature things
+
+=======
+Homey app that adds support for domoticz devices.
+
