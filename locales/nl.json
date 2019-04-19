@@ -1,0 +1,11 @@
+{
+  "settings": {
+    "hostname": "Hostnaam of ip adres",
+    "port": "Poort",
+    "username": "gebruikersnaam",
+    "password": "wachtwoord",
+    "save": "opslaan",
+    "refresh": "ververs",
+    "remove": "leeg maken"
+  }
+}

@@ -1,35 +1,85 @@
 {
   "id": "eu.jeroensomhorst.domoticz",
-  "version": "0.0.1",
+  "version": "0.1.5",
   "compatibility": ">=1.5.0",
   "sdk": 2,
   "name": {
-    "en": "Domoticz app "
+    "en": "Domoticz App",
+    "de": "Domoticz App"
   },
   "description": {
-    "en": "Add support for Domoticz devices"
+    "en": "Add support for Domoticz devices",
+    "nl": "Voegt support voor Domoticz apparaten toe",
+    "de": "Fügt Support für Domoticz-Geräte hinzu"
   },
   "category": [
     "energy","tools"
   ],
   "permissions": [],
   "images": {
-    "large": "/assets/images/large.png",
-    "small": "/assets/images/small.png"
+    "large": "assets/domoticz_large.jpg",
+    "small": "assets/domoticz_small.jpg"
   },
   "author": {
     "name": "Jeroen Somhorst",
     "email": "j.somhorst@gmail.com"
   },
-  "capabilities":{
 
+  "capabilities":{
+    "fan_speed": {
+      "type" : "number",
+      "title" : {
+        "en": "Fanspeed",
+        "nl": "Ventilator snelheid"
+      },
+      "getable": true,
+      "setable": false,
+      "units": {
+        "en": "RPM",
+        "nl": "RPM"
+      }
+    },
+    "power_meter_cumulative_high": {
+      "type": "number",
+      "title": {
+        "en": "Power reading T1",
+        "nl": "Meterstand T1"
+      },
+      "getable": true,
+      "setable": false,
+      "icon": "/assets/capabilities/electricity_meter.svg"
+    },
+    "power_meter_cumulative_low": {
+      "type": "number",
+      "title": {
+        "en": "Power reading T2",
+        "nl": "Meterstand T2"
+      },
+      "getable": true,
+      "setable": false,
+      "icon": "/assets/capabilities/electricity_meter.svg"
+    },
+    "gas_meter_cumulative": {
+      "type": "number",
+      "title": {
+        "en": "Gas counter total",
+        "nl": "Gas meter totaal"
+      },
+      "getable": true,
+      "setable": false,
+      "icon": "assets/capabilities/gas_meter.svg"
+    }
   },
   "drivers": [
     {
       "id": "domoticz_device",
-      "name": "Domotic Device",
+      "name": { "en":"Domoticz Device","nl": "Domoticz apparaat"},
       "class": "other",
       "capabilities": [],
+      "images": {
+        "large": "assets/driver/domoticz_large.jpg",
+        "small": "assets/driver/domoticz_small.jpg"
+      },
       "pair": [{
           "id": "domoticzsettings",
           "navigation": {
@@ -49,5 +99,12 @@
 
       ]
     }
-]
+  ],
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "jjtbsomhorst"
+      }
+    }
+  }
 }

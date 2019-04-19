@@ -2,12 +2,40 @@
 
 const Homey = require('homey');
 
-class MyApp extends Homey.App {
-	
+class DomoticzApp extends Homey.App {
+
 	onInit() {
-		this.log('MyApp is running...');
+
+		this.doLog('Domoticz app started');
+		this.doLog("Version: "+this.manifest.version);
+
+		Homey.on('unload',()=>{
+			this.doLog('Domoticz app unloaded');
+		});
+		Homey.on('memwarn',()=>{
+			this.doLog('Domoticz app memory warning!');
+			// Force garbage collection
+			try{
+				global.gc();
+			}catch(e){}
+
+		});
+
+
 	}
-	
+	doError(msg){
+
+		this.doLog("Error: "+msg);
+
+	}
+
+	doLog(msg){
+		if(msg instanceof Object){
+			this.log(JSON.stringify(msg));
+		}else{
+			this.log(msg);
+		}
+	}
 }
 
-module.exports = MyApp;
+module.exports = DomoticzApp;
