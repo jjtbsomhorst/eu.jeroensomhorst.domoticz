@@ -57,7 +57,8 @@ class DomoticzDevice extends Homey.Device{
                     }
                     break;
                 case CAPABILITY_MEASURE_POWER:
-                    value = parseFloat(data.Usage.split(" ")[0]);
+                    const powerDelivery = data.UsageDeliv ? parseFloat(data.UsageDeliv.split(" ")[0]) : 0;
+                    value = parseFloat(data.Usage.split(" ")[0]) - powerDelivery;
                     break;
                 case CAPABILITY_METER_POWER:
                     value = parseFloat(data.CounterToday.split(" ")[0]);
