@@ -22,17 +22,16 @@ const CAPABILITY_METER_RAIN = "meter_rain";
 
 class DomoticzDevice extends Homey.Device{
     onInit(){
-        this.registerMultipleCapabilityListener(this.getCapabilities(),(values,opts)=>{
+        this.capabilities = this.getCapabilities();
+        this.idx = this.getData().idx;
+
+        this.registerMultipleCapabilityListener(this.capabilities,(values,opts)=>{
             this.onCapabilityChange(values,opts);
-        },500); // every half second
+        }); // every half second
 
         this.getDriver().on('domoticzdata',(data)=>{
-            if(data!==null) {
-                data.forEach((element) => {
-                    if (element.idx === this.getData().idx) {
-                        this._updateInternalState(element);
-                    }
-                });
+            if(data !== null && data.idx === this.idx){
+                this._updateInternalState(data);
             }
         });
 
@@ -40,8 +39,7 @@ class DomoticzDevice extends Homey.Device{
 
     _updateInternalState(data){
         Homey.app.doLog("Update internal state of device");
-        Homey.app.doLog(this.getData().idx);
-        this.getCapabilities().forEach((element)=>{
+        this.capabilities.forEach((element)=>{
             let oldValue = this.getCapabilityValue(element);
             let value = null;
             switch(element){
@@ -108,9 +106,6 @@ class DomoticzDevice extends Homey.Device{
                     break;
             }
             if(value !== null && value !== oldValue){
-                Homey.app.doLog('Setting capability value');
-                Homey.app.doLog('Value before: '+oldValue);
-                Homey.app.doLog('Value after: '+value);
                 this.setCapabilityValue(element,value,(err)=>{
                     if(err){
                         Homey.app.doError(' ----- Unsuccessful updating capability ------');

@@ -65,28 +65,21 @@ class DomoticzDriver extends Homey.Driver{
 
 
     onCronRun(){
-    this.getDomoticz().getDeviceData(null).then((result)=>{
-        this.emit("domoticzdata",result);
-    }).catch((error)=>{
-        this.emit("domoticzdataerror",error);
-        Homey.app.doError('Unable to retrieve state of device');
-        Homey.app.doError(error);
-    });
+        if(this.getDevices().length > 0) {
+            this.getDomoticz().getDeviceData(null).then((result) => {
+                try {
+                    result.forEach((element) => {
+                        this.emit("domoticzdata", element);
+                    });
 
-    /**
-
-        this.getDevices().forEach((d)=>{
-            Homey.app.doLog('Get data for device: '+d.getData().idx);
-            this.getDomoticz().getDeviceData(d.getData().idx).then((result)=>{
-                Homey.app.doLog("Got device data");
-                Homey.app.doLog('Data: '+result);
-                this._updateInternalState(d,result[0]);
-            }).catch((error)=>{
-               Homey.app.doError('Unable to retrieve state of device');
-               Homey.app.doError(error);
+                } catch (e) {
+                }
+            }).catch((error) => {
+                this.emit("domoticzdataerror", error);
+                Homey.app.doError('Unable to retrieve state of device');
+                Homey.app.doError(error);
             });
-        });
-    **/
+        }
     }
 
     updateExternalState(values,device){
@@ -138,7 +131,7 @@ class DomoticzDriver extends Homey.Driver{
         socket.on('start',(data,callback)=>{
             Homey.app.doLog("Start pairing. Retrieve connect settings");
 
-            this.retrieveSettings(data,callback);
+            DomoticzDriver.retrieveSettings(data,callback);
         });
 
         socket.on('validate',(data,callback)=>{
@@ -206,8 +199,6 @@ class DomoticzDriver extends Homey.Driver{
 
     static getDeviceCapabilities(deviceEntry){
         let capabilities = new Set();
-        Homey.app.doLog("Get capabilities for device");
-        Homey.app.doLog(deviceEntry.idx);
         switch(deviceEntry.Type){
             case "Humidity":
                 capabilities.add(CAPABILITY_MEASURE_HUMIDITY);
@@ -285,62 +276,64 @@ class DomoticzDriver extends Homey.Driver{
                 capabilities.add(CAPABILITY_MEASURE_VOLTAGE);
                 break;
         }
-        Homey.app.doLog("Capabilities found: ");
-        Homey.app.doLog(capabilities);
-
         return capabilities;
     }
 
     onPairListDevices( data, callback ) {
+        Homey.app.debug  =true;
         Homey.app.doLog("On pair list devices");
 
-        let domoticz = this.getDomoticz();
-        if(!domoticz){
+
+        if(this.getDomoticz() === null || this.getDomoticz() === undefined){
+            Homey.app.dolog("Domoticz not initialized correctly?");
             callback(false,"kapot");
             return;
         }
 
 
+        this.getDomoticz().getDeviceData(null).then((result)=>{
+            Homey.app.doLog("Devices found");
+            Homey.app.doLog("We got some results.");
+            let currentDevices = [];
+            this.getDevices().forEach((device)=>{
+                console.log("Device : "+device.idx);
+                currentDevices.push(device.idx);
+            });
 
+            Homey.app.doLog("current devices registered:");
+            Homey.app.doLog(currentDevices.length);
 
-        domoticz.findDevice(null,null,null).then((result)=>{
             let devices = [];
-
             result.forEach((element)=>{
-                if(!this.deviceList.has(element.idx)){
-
-
-                        let capabilities = this.getDeviceCapabilities(element);
-                        let deviceClass = this.getDeviceClass(element);
-                        Homey.app.doLog(capabilities);
-                        Homey.app.doLog(deviceClass);
-
-                        if(capabilities.size > 0 && deviceClass != null){
-                            devices.push({
-                                "name": element.Name || DEVICE_DEFAULT_NAME,
-                                "class": deviceClass,
-                                "capabilities": Array.from(capabilities),
-                                "data": {
-                                    id: this.guid(),
-                                    idx: element.idx,
-                                }
-                            });
-                        }else{
-                            Homey.app.doLog("Could not determine device class or capabilities for device");
-                            Homey.app.doLog(element);
-                        }
-
-
+                Homey.app.doLog("idx:"+element.idx);
+                if(currentDevices.indexOf(element.idx) === -1 ){
+                //if(!deviceList.has(element.idx)){
+                    let capabilities = DomoticzDriver.getDeviceCapabilities(element);
+                    let deviceClass = DomoticzDriver.getDeviceClass(element);
+                    if(capabilities.size > 0 && deviceClass != null){
+                        devices.push({
+                            "name": element.Name || DEVICE_DEFAULT_NAME,
+                            "class": deviceClass,
+                            "capabilities": Array.from(capabilities),
+                            "data": {
+                                id: this.guid(),
+                                idx: element.idx,
+                            }
+                        });
+                    }
                 }
             });
+
             Homey.app.doLog("Devices found: ");
             Homey.app.doLog(devices.length);
+            Homey.app.debug=false;
             callback(null,devices);
-        }).catch((error)=>{
-            Homey.app.doLog("Error while retrieving devicelist");
-            Homey.app.doLog(error);
-           callback(false,error);
-        });
+    }).catch((error)=>{
+        Homey.app.doLog("Error while retrieving devicelist");
+        Homey.app.doLog(error);
+       callback(false,error);
+    });
+        Homey.app.debug  =false;
     }
 
     guid() {

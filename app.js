@@ -5,7 +5,7 @@ const Homey = require('homey');
 class DomoticzApp extends Homey.App {
 
 	onInit() {
-
+		this.debug = false;
 		this.doLog('Domoticz app started');
 		this.doLog("Version: "+this.manifest.version);
 
@@ -30,11 +30,14 @@ class DomoticzApp extends Homey.App {
 	}
 
 	doLog(msg){
-		if(msg instanceof Object){
-			this.log(JSON.stringify(msg));
-		}else{
-			this.log(msg);
-		}
+		//if(this.debug) {
+
+			if (msg instanceof Object) {
+				this.log(JSON.stringify(msg));
+			} else {
+				this.log(msg);
+			}
+		//}
 	}
 }
 
