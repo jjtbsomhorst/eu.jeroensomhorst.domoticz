@@ -6,6 +6,8 @@
     "password": "password",
     "save": "save",
     "refresh": "refresh",
-    "remove": "clear"
+    "remove": "clear",
+    "groupdevices": "Group by hardware",
+    "seperatedevices": "Show separate devices"
   }
 }

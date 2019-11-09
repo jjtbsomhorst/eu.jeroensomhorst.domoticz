@@ -6,6 +6,8 @@
     "password": "wachtwoord",
     "save": "opslaan",
     "refresh": "ververs",
-    "remove": "leeg maken"
+    "remove": "leeg maken",
+    "groupdevices": "Groepeer op hardware type",
+    "seperatedevices": "Toon losse apparaten"
   }
 }

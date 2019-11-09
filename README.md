@@ -3,6 +3,8 @@
 
 Add support for Domoticz devices
 
+* 0.1.6 Added support for so called 'Lighting 1' devices. Also improved error detection when connecting to Domoticz
+
 * 0.1.5 Refactored the code moved from driver only to device driven. This seems to decrease memory usage?
 
 * 0.1.4 Fixed the capability for the WTGR800 device(s) and some smaller optimizations

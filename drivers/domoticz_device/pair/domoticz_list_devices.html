@@ -1,0 +1,96 @@
+<script type="text/javascript">
+    $(function(){
+        var deviceList = [];
+        $().ready(()=>{
+            Homey.setTitle("List devices");
+            Homey.emit('domoticz_list_devices',{},(err,result)=>{
+                this.deviceList = result;
+                render(this.deviceList,'grouped');
+            });
+
+            $("#btnGroupDevices").click(()=>{
+                render(this.deviceList,'grouped');
+            });
+
+            $("#btnUngroupDevices").click(()=>{
+                render(this.deviceList,"rawlist");
+            });
+
+        });
+
+        function render(devices,displayType){
+            Homey.setTitle("rendering");
+            $("#empytlist").show();
+            let deviceList = devices;
+            if(displayType === 'grouped'){
+                deviceList = []; //empty it
+                let groupedList = new Map();
+                devices.forEach((element)=>{
+                    if(!groupedList.has(element.data.hardwareName)){
+
+                        groupedList.set(element.data.hardwareName,{
+                            'name':element.data.hardwareName,
+                            'idx':[]
+                        });
+                    }
+                    groupedList.get(element.data.hardwareName).idx.push(element.data.idx);
+                });
+                groupedList.forEach((value,key,map)=>{
+                   deviceList.push(value);
+                });
+            }
+
+            if(deviceList.length > 0) {
+                $("#deviceList").empty();
+                $("#empytlist").hide();
+                for (let i = 0; i < deviceList.length; i++) {
+                    let idxAttribute = "";
+                    if($.isArray(deviceList[i].idx)){
+                        deviceList[i].idx.join(",");
+                    }else{
+                        idxAttribute = deviceList[i].idx;
+                    }
+                    $("#deviceList").append("<div class='row deviceEntry'><div class='col-md-8'>"+deviceList[i].name+"</div><div data-idx='"+idxAttribute+"' class='col-md-4'><input type='checkbox' name='device'/></div></div>");
+                }
+
+                $("[name='device']").on('change',(event)=>{
+                    if($('input:checked').length > 0){
+                        $("#btnAddDevices").toggleClass('disabled');
+                    }
+                });
+
+                $("#btnAddDevices").on('click',()=>{
+                    $("input:checked").forEach((element)=>{
+                        
+                    });
+                });
+            }
+        }
+
+    });
+
+</script>
+
+<div class="container">
+    <div class="row" id="listButtons">
+        <div class="">
+            <button id="btnGroupDevices" type="button" data-i18n="settings.groupdevices" class="btn btn-default"></button>
+        </div>
+        <div class="">
+            <button id="btnUngroupDevices" type="button" data-i18n="settings.seperatedevices" class="btn btn-default"></button>
+        </div>
+        <div class="">
+            <button id="btnAddDevices" type="button" data-i18n="settings.storedevices" class="btn btn-default">knopje</button>
+        </div>
+    </div>
+    <div class="row" id="empytlist">
+        <div class="col-md-12">
+            No devices found
+        </div>
+    </div>
+</div>
+<div class="container" id="deviceList">
+
+</div>
+
+

@@ -140,7 +140,10 @@ class DomoticzDriver extends Homey.Driver{
         });
 
         socket.on('list_devices',(data,callback)=>{
-            Homey.app.doLog("List new devices");
+            this.onPairListDevices(data,callback);
+        });
+
+        socket.on('domoticz_list_devices',(data,callback)=>{
             this.onPairListDevices(data,callback);
         });
     }
@@ -211,6 +214,7 @@ class DomoticzDriver extends Homey.Driver{
                 capabilities.add(CAPABILITY_MEASURE_HUMIDITY);
                 break;
             case "Light/Switch":
+            case "Lighting 1":
             case "Lighting2":
             case "Lighting 2":
                 capabilities.add(CAPABILITY_ONOFF);
@@ -318,6 +322,8 @@ class DomoticzDriver extends Homey.Driver{
                             "data": {
                                 id: this.guid(),
                                 idx: element.idx,
+                                hardwareName: element.HardwareName,
+                                hardwareType: element.HardwareTypeVal
                             }
                         });
                     }

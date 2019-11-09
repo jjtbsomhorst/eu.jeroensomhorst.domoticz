@@ -1,6 +1,6 @@
 {
   "id": "eu.jeroensomhorst.domoticz",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "compatibility": ">=1.5.0",
   "sdk": 2,
   "name": {
@@ -83,13 +83,12 @@
       "pair": [{
           "id": "domoticzsettings",
           "navigation": {
-            "next": "list_devices"
+            "next": "domoticz_list_devices"
           }
         },{
-        "id": "list_devices",
-        "template": "list_devices",
+        "id": "domoticz_list_devices",
         "navigation": {
-          "next": "add_my_devices"
+          "previous": "domoticzsettings"
         }
       },
         {

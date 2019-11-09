@@ -6,6 +6,8 @@
     "password": "Passwort",
     "save": "speichern",
     "refresh": "erfrischen",
-    "remove": "löschen"
+    "remove": "löschen",
+    "groupdevices": "Nach Hardware gruppieren",
+    "seperatedevices": "Separate Geräte anzeigen"
   }
 }
